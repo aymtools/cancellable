@@ -1,0 +1,7 @@
+name: cancellable
+description: cancelable
+version: 1.0.1
+homepage:
+
+environment:
+  sdk: '>=2.12.2 <4.0.0'
