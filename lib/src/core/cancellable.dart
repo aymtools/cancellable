@@ -3,7 +3,7 @@ import 'dart:async';
 ///用于取消
 class Cancellable {
   final Completer _completer = Completer();
-  final List<Cancellable> _caches = [];
+  final Set<WeakReference<Cancellable>> _caches = {};
 
   bool _isCancelled = false;
 
@@ -23,13 +23,16 @@ class Cancellable {
     _isCancelled = true;
     _completer.complete();
     _caches
-        .where((element) => !element.isCancelled)
-        .forEach((element) => element._cancel(false));
+        .map((element) => element.target)
+        .where((element) => element != null && !element.isCancelled)
+        .forEach((element) => element?._cancel(false));
     _caches.clear();
 
     if (notifyCancelled) {
       _notifyCancelled?.call();
     }
+
+    _notifyCancelled = null;
   }
 
   ///基于当前 生产一个新的
@@ -41,20 +44,26 @@ class Cancellable {
       Future.delayed(const Duration(), () => c._cancel(false));
     } else {
       c._notifyCancelled = () {
-        _caches.removeWhere((c) => c.isCancelled);
-        father?._caches.removeWhere((c) => c.isCancelled);
+        _releaseCache();
+        father?._releaseCache();
         if (infectious) {
           cancel();
           father?.cancel();
         }
       };
-      _caches.add(c);
-      father?._caches.add(c);
+      var wc = WeakReference(c);
+      _caches.add(wc);
+      father?._caches.add(wc);
     }
     return c;
   }
 
   /// 移除由当前生产的able
-  void removeCancellable(Cancellable cancellable) =>
-      _caches.remove(cancellable);
+  void removeCancellable(Cancellable cancellable) {
+    _releaseCache();
+    _caches.removeWhere((c) => c.target == cancellable);
+  }
+
+  void _releaseCache() =>
+      _caches.removeWhere((c) => c.target?.isCancelled ?? true);
 }
