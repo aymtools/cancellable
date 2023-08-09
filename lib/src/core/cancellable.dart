@@ -1,7 +1,7 @@
 import 'dart:async';
 
 ///永远也不会执行的 Future
-class _NeverExecFuture<T> implements Future<T> {
+class NeverExecFuture<T> implements Future<T> {
   @override
   Stream<T> asStream() => StreamController<T>().stream;
 
@@ -12,7 +12,7 @@ class _NeverExecFuture<T> implements Future<T> {
   @override
   Future<R> then<R>(FutureOr<R> Function(T value) onValue,
       {Function? onError}) {
-    return _NeverExecFuture<R>();
+    return NeverExecFuture<R>();
   }
 
   @override
@@ -34,20 +34,28 @@ class Cancellable {
   bool _isCancelled = false;
 
   ///是否已经取消
+  ///使用 [isAvailable] [isUnavailable] 代替
+  @deprecated
   bool get isCancelled => _isCancelled;
 
   ///当取消时的处理
-  Future get whenCancel => _isReleased ? _NeverExecFuture() : _completer.future;
+  Future get whenCancel => _isReleased ? NeverExecFuture() : _completer.future;
 
   void Function()? _notifyCancelled;
 
   bool _isReleased = false;
 
+  /// 当前是否是不可用状态
+  bool get isUnavailable => _isCancelled | _isReleased;
+
+  /// 当前是否是可用状态
+  bool get isAvailable => !isUnavailable;
+
   ///通知执行取消
   void cancel() => _cancel(true);
 
   void _cancel(bool notifyCancelled) {
-    if (_canNotUse) return;
+    if (isUnavailable) return;
     _isCancelled = true;
     _completer.complete();
     _caches
@@ -70,8 +78,11 @@ class Cancellable {
   Cancellable makeCancellable({Cancellable? father, bool infectious = false}) {
     _releaseCache();
     Cancellable c = Cancellable();
-    if (_isReleased) return c;
-    if (isCancelled || (father != null && father.isCancelled)) {
+    if (_isReleased || (father != null && father._isReleased)) {
+      c._isReleased = true;
+      return c;
+    }
+    if (_isCancelled || (father != null && father._isCancelled)) {
       Future.delayed(const Duration(), () => c._cancel(false));
     } else {
       c._notifyCancelled = () {
@@ -95,16 +106,14 @@ class Cancellable {
     _caches.removeWhere((c) => c.target == cancellable);
   }
 
-  bool get _canNotUse => isCancelled || _isReleased;
-
   void _releaseCache() {
-    if (_canNotUse) return;
-    _caches.removeWhere((c) => c.target?._canNotUse ?? true);
+    if (isUnavailable) return;
+    _caches.removeWhere((c) => c.target?.isUnavailable ?? true);
   }
 
   // 施放资源 当前able不在使用
   void release({bool notifyToChild = true}) {
-    if (_canNotUse) return;
+    if (isUnavailable) return;
     _isReleased = true;
     if (notifyToChild) _caches.forEach((c) => c.target?.release());
     _caches.clear();
