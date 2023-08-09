@@ -34,7 +34,7 @@ class Cancellable {
   bool _isCancelled = false;
 
   ///是否已经取消
-  ///使用 [isAvailable] [isUnavailable] 代替
+  ///使用 [isAvailable] 或 [isUnavailable] 代替
   @deprecated
   bool get isCancelled => _isCancelled;
 
@@ -61,7 +61,7 @@ class Cancellable {
     _caches
         .map((element) => element.target)
         .where((element) =>
-            element != null && !element.isCancelled && !element._isReleased)
+            element != null && element.isAvailable)
         .forEach((element) => element?._cancel(false));
     _caches.clear();
 
@@ -102,12 +102,13 @@ class Cancellable {
 
   /// 移除由当前生产的able
   void removeCancellable(Cancellable cancellable) {
+    if (isUnavailable) return;
+    cancellable.release();
     _releaseCache();
     _caches.removeWhere((c) => c.target == cancellable);
   }
 
   void _releaseCache() {
-    if (isUnavailable) return;
     _caches.removeWhere((c) => c.target?.isUnavailable ?? true);
   }
 

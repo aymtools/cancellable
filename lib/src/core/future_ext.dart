@@ -15,6 +15,7 @@ extension CancellableFuture<T> on Future<T> {
       if (cancellable.isAvailable) {
         completer.completeError(err, st);
       }
+      return Future<T>.value();
     });
     this.whenComplete(() => cancellable.release());
     return completer.future;
