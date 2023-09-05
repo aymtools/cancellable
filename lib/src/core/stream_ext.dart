@@ -44,4 +44,44 @@ extension CancellableStream<T> on Stream<T> {
 
     return this.transform(StreamTransformer.fromBind(bind));
   }
+
+  StreamSubscription<T> listenC({
+    required Cancellable cancellable,
+    void onData(T event)?,
+    Function? onError,
+    void onDone()?,
+    bool? cancelOnError,
+  }) {
+    // if (cancellable.isUnavailable) return;
+    var sub = this.listen(onData,
+        onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+    cancellable.whenCancel.then((value) => sub.cancel());
+    return sub;
+  }
+}
+
+extension CancellableStreamController<T> on StreamController<T> {
+  StreamController<T> cancelByCancellable(Cancellable cancellable) {
+    cancellable.whenCancel.then((_) => this.onCancel?.call());
+    return this;
+  }
+
+  StreamController<T> closeByCancellable(Cancellable cancellable) {
+    cancellable.whenCancel.then((_) => this.close.call());
+    return this;
+  }
+}
+
+extension CancellableStreamSinkr<T> on StreamSink<T> {
+  StreamSink<T> closeByCancellable(Cancellable cancellable) {
+    cancellable.whenCancel.then((_) => this.close.call());
+    return this;
+  }
+}
+
+extension CancellableStreamSubscription<T> on StreamSubscription<T> {
+  StreamSubscription<T> cancelByCancellable(Cancellable cancellable) {
+    cancellable.whenCancel.then((_) => this.cancel());
+    return this;
+  }
 }
