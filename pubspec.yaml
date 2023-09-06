@@ -1,7 +1,10 @@
 name: cancellable
-description: cancelable
-version: 1.0.4
+description: This package provides a capability for cancellation.
+version: 1.0.5
 homepage: https://github.com/aymtools/cancellable
 
 environment:
   sdk: '>=2.17.0 <4.0.0'
+
+dependencies:
+  weak_collections: ^1.0.0

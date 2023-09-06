@@ -1,10 +1,6 @@
-# cancellable
+import 'package:cancellable/cancellable.dart';
 
-This package provides a capability for cancellation.
-
-## Usage
-
-```
+main() {
   Cancellable cancellable = Cancellable();
 
   var sub =
@@ -15,10 +11,8 @@ This package provides a capability for cancellation.
   sub.cancelByCancellable(
       cancellable); //  cancellable.whenCancel.then((value) => sub.cancel());
 
-  // 在其他任意的地方取消这个订阅 
   Future.delayed(Duration(seconds: 1)).then((value) => cancellable.cancel());
-  
-  
+
   ///print
   ///0
   // 1
@@ -31,12 +25,4 @@ This package provides a capability for cancellation.
   // 8
   // 9
   // end
-```
-
-See [example](https://github.com/aymtools/cancellable/example) for detailed test
-case.
-
-## Issues
-
-If you encounter issues, here are some tips for debug, if nothing helps report
-to [issue tracker on GitHub](https://github.com/aymtools/cancellable/issues):
+}

@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:weak_collections/weak_collections.dart';
+
 ///永远也不会执行的 Future
 class NeverExecFuture<T> implements Future<T> {
   @override
@@ -29,7 +31,9 @@ class NeverExecFuture<T> implements Future<T> {
 ///用于取消
 class Cancellable {
   final Completer _completer = Completer();
-  final Set<WeakReference<Cancellable>> _caches = {};
+
+  // final Set<WeakReference<Cancellable>> _caches = {};
+  final WeakSet<Cancellable> _caches = WeakSet<Cancellable>();
 
   bool _isCancelled = false;
 
@@ -59,10 +63,8 @@ class Cancellable {
     _isCancelled = true;
     _completer.complete();
     _caches
-        .map((element) => element.target)
-        .where((element) =>
-            element != null && element.isAvailable)
-        .forEach((element) => element?._cancel(false));
+        .where((element) => element.isAvailable)
+        .forEach((element) => element._cancel(false));
     _caches.clear();
 
     if (notifyCancelled) {
@@ -93,9 +95,8 @@ class Cancellable {
           father?.cancel();
         }
       };
-      var wc = WeakReference(c);
-      _caches.add(wc);
-      father?._caches.add(wc);
+      _caches.add(c);
+      father?._caches.add(c);
     }
     return c;
   }
@@ -105,18 +106,17 @@ class Cancellable {
     if (isUnavailable) return;
     cancellable.release();
     _releaseCache();
-    _caches.removeWhere((c) => c.target == cancellable);
   }
 
   void _releaseCache() {
-    _caches.removeWhere((c) => c.target?.isUnavailable ?? true);
+    _caches.removeWhere((c) => c.isUnavailable);
   }
 
   // 施放资源 当前able不在使用
   void release({bool notifyToChild = true}) {
     if (isUnavailable) return;
     _isReleased = true;
-    if (notifyToChild) _caches.forEach((c) => c.target?.release());
+    if (notifyToChild) _caches.forEach((c) => c.release());
     _caches.clear();
   }
 }
