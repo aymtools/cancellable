@@ -21,3 +21,8 @@
 ## 1.0.5
 
 * 更新库说明，更新child的Cancellable的软引用，使执行效率更高
+
+
+## 1.0.6
+
+* Cancellable新增同步的cancel回调onCancel

@@ -19,7 +19,7 @@ class NeverExecFuture<T> implements Future<T> {
 
   @override
   Future<T> timeout(Duration timeLimit, {FutureOr<T> Function()? onTimeout}) {
-    return this;
+    return Future<T>.delayed(timeLimit, onTimeout);
   }
 
   @override
@@ -31,6 +31,7 @@ class NeverExecFuture<T> implements Future<T> {
 ///用于取消
 class Cancellable {
   final Completer _completer = Completer();
+  final Completer _completerSync = Completer.sync();
 
   // final Set<WeakReference<Cancellable>> _caches = {};
   final WeakSet<Cancellable> _caches = WeakSet<Cancellable>();
@@ -44,6 +45,10 @@ class Cancellable {
 
   ///当取消时的处理
   Future get whenCancel => _isReleased ? NeverExecFuture() : _completer.future;
+
+  ///当取消时的处理 同步处理
+  Future get onCancel =>
+      _isReleased ? NeverExecFuture() : _completerSync.future;
 
   void Function()? _notifyCancelled;
 
@@ -61,6 +66,7 @@ class Cancellable {
   void _cancel(bool notifyCancelled) {
     if (isUnavailable) return;
     _isCancelled = true;
+    _completerSync.complete();
     _completer.complete();
     _caches
         .where((element) => element.isAvailable)
@@ -118,5 +124,6 @@ class Cancellable {
     _isReleased = true;
     if (notifyToChild) _caches.forEach((c) => c.release());
     _caches.clear();
+    _notifyCancelled = null;
   }
 }

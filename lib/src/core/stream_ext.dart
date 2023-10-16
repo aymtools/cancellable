@@ -53,7 +53,10 @@ extension CancellableStream<T> on Stream<T> {
     bool? cancelOnError,
   }) {
     // if (cancellable.isUnavailable) return;
-    var sub = this.listen(onData,
+    var onDataX = (T event) {
+      if (cancellable.isAvailable) onData?.call(event);
+    };
+    var sub = this.listen(onDataX,
         onError: onError, onDone: onDone, cancelOnError: cancelOnError);
     cancellable.whenCancel.then((value) => sub.cancel());
     return sub;
