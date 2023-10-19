@@ -47,14 +47,29 @@ extension CancellableStream<T> on Stream<T> {
 
   StreamSubscription<T> listenC({
     required Cancellable cancellable,
-    void onData(T event)?,
+    required void onData(T event),
     Function? onError,
     void onDone()?,
     bool? cancelOnError,
   }) {
-    // if (cancellable.isUnavailable) return;
     var onDataX = (T event) {
-      if (cancellable.isAvailable) onData?.call(event);
+      if (cancellable.isAvailable) onData.call(event);
+    };
+    var sub = this.listen(onDataX,
+        onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+    cancellable.whenCancel.then((value) => sub.cancel());
+    return sub;
+  }
+
+  StreamSubscription<T> listenCC(
+    void onData(T event), {
+    required Cancellable cancellable,
+    Function? onError,
+    void onDone()?,
+    bool? cancelOnError,
+  }) {
+    var onDataX = (T event) {
+      if (cancellable.isAvailable) onData.call(event);
     };
     var sub = this.listen(onDataX,
         onError: onError, onDone: onDone, cancelOnError: cancelOnError);

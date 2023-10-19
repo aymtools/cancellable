@@ -91,7 +91,7 @@ class Cancellable {
       return c;
     }
     if (_isCancelled || (father != null && father._isCancelled)) {
-      Future.delayed(const Duration(), () => c._cancel(false));
+      Future.microtask(() => c._cancel(false));
     } else {
       c._notifyCancelled = () {
         _releaseCache();
