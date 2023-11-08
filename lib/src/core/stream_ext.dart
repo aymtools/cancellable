@@ -99,7 +99,7 @@ extension CancellableStreamSinkr<T> on StreamSink<T> {
 
 extension CancellableStreamSubscription<T> on StreamSubscription<T> {
   StreamSubscription<T> cancelByCancellable(Cancellable cancellable) {
-    cancellable.whenCancel.then((_) => this.cancel());
+    cancellable.onCancel.then((_) => this.cancel());
     return this;
   }
 }

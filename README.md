@@ -33,7 +33,7 @@ This package provides a capability for cancellation.
   // end
 ```
 
-See [example](https://github.com/aymtools/cancellable/example) for detailed test
+See [example](https://github.com/aymtools/cancellable/blob/master/example/cancellable_example.dart) for detailed test
 case.
 
 ## Issues
