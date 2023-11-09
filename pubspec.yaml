@@ -1,6 +1,6 @@
 name: cancellable
 description: This package provides a capability for cancellation.
-version: 1.0.7
+version: 1.0.8
 homepage: https://github.com/aymtools/cancellable
 
 environment:

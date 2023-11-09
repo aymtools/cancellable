@@ -30,8 +30,8 @@ class NeverExecFuture<T> implements Future<T> {
 
 ///用于取消
 class Cancellable {
-  final Completer _completer = Completer();
-  final Completer _completerSync = Completer.sync();
+  final Completer<dynamic> _completer = Completer();
+  final Completer<dynamic> _completerSync = Completer.sync();
 
   // final Set<WeakReference<Cancellable>> _caches = {};
   final WeakSet<Cancellable> _caches = WeakSet<Cancellable>();
@@ -44,10 +44,11 @@ class Cancellable {
   bool get isCancelled => _isCancelled;
 
   ///当取消时的处理
-  Future get whenCancel => _isReleased ? NeverExecFuture() : _completer.future;
+  Future<dynamic> get whenCancel =>
+      _isReleased ? NeverExecFuture<dynamic>() : _completer.future;
 
   ///当取消时的处理 同步处理
-  Future get onCancel =>
+  Future<dynamic> get onCancel =>
       _isReleased ? NeverExecFuture() : _completerSync.future;
 
   void Function()? _notifyCancelled;
@@ -60,17 +61,20 @@ class Cancellable {
   /// 当前是否是可用状态
   bool get isAvailable => !isUnavailable;
 
-  ///通知执行取消
-  void cancel() => _cancel(true);
+  dynamic _reason;
 
-  void _cancel(bool notifyCancelled) {
+  ///通知执行取消
+  void cancel([dynamic reason]) => _cancel(true, reason);
+
+  void _cancel(bool notifyCancelled, dynamic reason) {
     if (isUnavailable) return;
     _isCancelled = true;
-    _completerSync.complete();
-    _completer.complete();
+    _reason = reason;
+    _completerSync.complete(reason);
+    _completer.complete(reason);
     _caches
         .where((element) => element.isAvailable)
-        .forEach((element) => element._cancel(false));
+        .forEach((element) => element._cancel(false, reason));
     _caches.clear();
 
     if (notifyCancelled) {
@@ -91,7 +95,7 @@ class Cancellable {
       return c;
     }
     if (_isCancelled || (father != null && father._isCancelled)) {
-      Future.microtask(() => c._cancel(false));
+      Future.microtask(() => c._cancel(false, _reason ?? father?._reason));
     } else {
       c._notifyCancelled = () {
         _releaseCache();
