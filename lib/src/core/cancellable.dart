@@ -28,7 +28,8 @@ class NeverExecFuture<T> implements Future<T> {
   }
 }
 
-///用于取消
+///用于取消 不支持跨isolate使用
+@pragma('vm:isolate-unsendable')
 class Cancellable {
   final Completer<dynamic> _completer = Completer();
   final Completer<dynamic> _completerSync = Completer.sync();
