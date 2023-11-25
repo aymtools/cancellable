@@ -2,6 +2,10 @@ name: cancellable
 description: This package provides a capability for cancellation.
 version: 1.0.9
 homepage: https://github.com/aymtools/cancellable
+topics:
+  - cancel
+  - cancelable
+  - cancelToken
 
 environment:
   sdk: '>=2.17.0 <4.0.0'

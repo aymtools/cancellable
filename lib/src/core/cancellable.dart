@@ -41,7 +41,7 @@ class Cancellable {
 
   ///是否已经取消
   ///使用 [isAvailable] 或 [isUnavailable] 代替
-  @deprecated
+  @Deprecated('Use isAvailable or isUnavailable')
   bool get isCancelled => _isCancelled;
 
   ///当取消时的处理
