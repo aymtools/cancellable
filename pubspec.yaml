@@ -5,7 +5,8 @@ homepage: https://github.com/aymtools/cancellable
 topics:
   - cancel
   - cancelable
-  - cancelToken
+  - cancel-token
+  - cancellation
 
 environment:
   sdk: '>=2.17.0 <4.0.0'
