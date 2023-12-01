@@ -41,3 +41,8 @@
 ## 1.1.0
 
 * 声明Cancellable不可跨isolate使用
+
+## 1.1.1
+
+* 修复Stream.bindCancellable时部分情况未初始化，
+* Stream.bindCancellable默认closeWhenCancel = true

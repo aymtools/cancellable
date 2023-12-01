@@ -4,13 +4,14 @@ import 'cancellable.dart';
 
 extension CancellableStream<T> on Stream<T> {
   Stream<T> bindCancellable(Cancellable cancellable,
-      {bool closeWhenCancel = false}) {
+      {bool closeWhenCancel = true}) {
     Stream<T> bind(Stream<T> stream) {
       late StreamController<T> controller;
       if (cancellable.isUnavailable) {
         if (closeWhenCancel) {
           return Stream<T>.empty();
         }
+        return StreamController<T>().stream;
       } else {
         StreamSubscription<T>? sub;
         void onListen() {
