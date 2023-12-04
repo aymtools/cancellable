@@ -46,3 +46,7 @@
 
 * 修复Stream.bindCancellable时部分情况未初始化，
 * Stream.bindCancellable默认closeWhenCancel = true
+
+## 1.1.2
+
+* 增加Cancellable.bindCancellable,互相绑定后任意一个取消的同时会去取消另一个
