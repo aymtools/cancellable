@@ -15,6 +15,12 @@ extension CancellableStream<T> on Stream<T> {
       } else {
         StreamSubscription<T>? sub;
         void onListen() {
+          if (cancellable.isUnavailable) {
+            if (closeWhenCancel && !controller.isClosed) {
+              controller.close();
+            }
+            return;
+          }
           sub = this.listen((event) {
             if (cancellable.isAvailable) controller.add(event);
           }, onError: (err, st) {
@@ -26,7 +32,7 @@ extension CancellableStream<T> on Stream<T> {
 
         void onCancel() {
           sub?.cancel();
-          if (closeWhenCancel) {
+          if (closeWhenCancel && !controller.isClosed) {
             controller.close();
           }
         }

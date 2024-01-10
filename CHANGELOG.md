@@ -50,3 +50,4 @@
 ## 1.1.2
 
 * 增加Cancellable.bindCancellable,互相绑定后任意一个取消的同时会去取消另一个
+* 修正Stream.bindCancellable时特殊情况cancel未关闭
