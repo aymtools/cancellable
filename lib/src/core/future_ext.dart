@@ -1,9 +1,12 @@
 import 'dart:async';
 
+import 'package:cancellable/cancellable.dart';
+
 import 'cancellable.dart';
 
 extension CancellableFuture<T> on Future<T> {
-  Future<T> bindCancellable(Cancellable cancellable) {
+  Future<T> bindCancellable(Cancellable cancellable,
+      {bool throwWhenCancel = false}) {
     if (cancellable.isUnavailable) return NeverExecFuture<T>();
     var completer = Completer<T>.sync();
     this.then((value) {
@@ -17,6 +20,10 @@ extension CancellableFuture<T> on Future<T> {
       }
       return Future<T>.value();
     });
+    if (throwWhenCancel) {
+      cancellable.whenCancel.then((value) =>
+          completer.completeError(CancelledException(value), StackTrace.empty));
+    }
     this.whenComplete(() => cancellable.release());
     return completer.future;
   }

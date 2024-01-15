@@ -1,3 +1,7 @@
+## 1.1.4
+
+* Future.bindCancellable时允许以抛出异常[CancelledException]的方式继续
+
 ## 1.1.3
 
 * 修正Stream.bindCancellable时特殊情况cancel未关闭
