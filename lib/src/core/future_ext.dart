@@ -7,7 +7,13 @@ import 'cancellable.dart';
 extension CancellableFuture<T> on Future<T> {
   Future<T> bindCancellable(Cancellable cancellable,
       {bool throwWhenCancel = false}) {
-    if (cancellable.isUnavailable) return NeverExecFuture<T>();
+    if (cancellable.isUnavailable) {
+      if (cancellable.isCancelled && throwWhenCancel) {
+        return Future.error(
+            CancelledException(cancellable.reason), StackTrace.current);
+      }
+      return NeverExecFuture<T>();
+    }
     var completer = Completer<T>.sync();
     this.then((value) {
       if (cancellable.isAvailable) {

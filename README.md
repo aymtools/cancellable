@@ -33,8 +33,11 @@ This package provides a capability for cancellation.
   // end
 ```
 
-See [example](https://github.com/aymtools/cancellable/blob/master/example/cancellable_example.dart) for detailed test
-case.
+See [example](https://github.com/aymtools/cancellable/blob/master/example/cancellable_example.dart)
+for detailed test case.
+
+For more usage in flutter,
+see:[aymtools](https://github.com/aymtools/flutter_aymtools)
 
 ## Issues
 

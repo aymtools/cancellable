@@ -34,8 +34,7 @@ class Cancellable {
   final Completer<dynamic> _completer = Completer();
   final Completer<dynamic> _completerSync = Completer.sync();
 
-  // final Set<WeakReference<Cancellable>> _caches = {};
-  final WeakSet<Cancellable> _caches = WeakSet<Cancellable>();
+  WeakSet<Cancellable>? _caches;
 
   bool _isCancelled = false;
 
@@ -64,6 +63,9 @@ class Cancellable {
 
   dynamic _reason;
 
+  ///执行通知取消时传递的消息
+  dynamic get reason => _reason;
+
   ///通知执行取消
   void cancel([dynamic reason]) => _cancel(true, reason);
 
@@ -74,9 +76,10 @@ class Cancellable {
     _completerSync.complete(reason);
     _completer.complete(reason);
     _caches
-        .where((element) => element.isAvailable)
+        ?.where((element) => element.isAvailable)
         .forEach((element) => element._cancel(false, reason));
-    _caches.clear();
+    _caches?.clear();
+    _caches = null;
 
     if (notifyCancelled) {
       _notifyCancelled?.call();
@@ -106,29 +109,34 @@ class Cancellable {
           father?.cancel();
         }
       };
-      _caches.add(c);
-      father?._caches.add(c);
+      _addToCache(c);
+      father?._addToCache(c);
     }
     return c;
   }
 
+  void _addToCache(Cancellable cancellable) {
+    _caches ??= WeakSet<Cancellable>();
+    _caches?.add(cancellable);
+  }
+
   /// 移除由当前生产的able
   void removeCancellable(Cancellable cancellable) {
-    if (isUnavailable) return;
-    cancellable.release();
+    if (isUnavailable || cancellable.isUnavailable) return;
+    _caches?.remove(cancellable);
     _releaseCache();
   }
 
   void _releaseCache() {
-    _caches.removeWhere((c) => c.isUnavailable);
+    _caches?.removeWhere((c) => c.isUnavailable);
   }
 
-  // 施放资源 当前able不在使用
+  /// 施放资源 当前able不在使用
   void release({bool notifyToChild = true}) {
     if (isUnavailable) return;
     _isReleased = true;
-    if (notifyToChild) _caches.forEach((c) => c.release());
-    _caches.clear();
+    if (notifyToChild) _caches?.forEach((c) => c.release());
+    _caches?.clear();
     _notifyCancelled = null;
   }
 }

@@ -95,6 +95,11 @@ extension CancellableStreamController<T> on StreamController<T> {
     cancellable.whenCancel.then((_) => this.close.call());
     return this;
   }
+
+  StreamController<T> bindCancellable(Cancellable cancellable) {
+    cancellable.whenCancel.then((_) => this.close.call());
+    return this;
+  }
 }
 
 extension CancellableStreamSinkr<T> on StreamSink<T> {
@@ -102,10 +107,20 @@ extension CancellableStreamSinkr<T> on StreamSink<T> {
     cancellable.whenCancel.then((_) => this.close.call());
     return this;
   }
+
+  StreamSink<T> bindCancellable(Cancellable cancellable) {
+    cancellable.whenCancel.then((_) => this.close.call());
+    return this;
+  }
 }
 
 extension CancellableStreamSubscription<T> on StreamSubscription<T> {
   StreamSubscription<T> cancelByCancellable(Cancellable cancellable) {
+    cancellable.onCancel.then((_) => this.cancel());
+    return this;
+  }
+
+  StreamSubscription<T> bindCancellable(Cancellable cancellable) {
     cancellable.onCancel.then((_) => this.cancel());
     return this;
   }
