@@ -3,6 +3,7 @@
 * 增加Cancellable中的WeakSet的初始化，使用时才进行初始化优化内存占用
 * 调整Cancellable.bindCancellable时throwWhenCancel=true，部分情况未抛出异常
 * Stream的扩展统一使用bindCancellable
+* Cancellable.release由于可能存在cancel链，直接释放可能导致其他问题，现标注过时，未来将会移除
 
 ## 1.1.4
 

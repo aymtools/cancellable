@@ -132,6 +132,15 @@ class Cancellable {
   }
 
   /// 施放资源 当前able不在使用
+  /// After making multiple times, it is easy to trigger unforeseen hidden problems when using release.
+  /// It is no longer recommended. If this scenario is needed,
+  /// it is recommended to use double cancelable.bind to bind each other.
+  /// [Cancellable.bindCancellable]
+  /// Expected to be removed in the future
+  @Deprecated(
+      'After making multiple times, it is easy to trigger unforeseen hidden problems when using release. '
+      'It is no longer recommended. If this scenario is needed, '
+      'it is recommended to use double cancelable.bind to bind each other.')
   void release({bool notifyToChild = true}) {
     if (isUnavailable) return;
     _isReleased = true;
