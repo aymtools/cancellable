@@ -4,33 +4,34 @@ import 'package:cancellable/cancellable.dart';
 
 import 'cancellable.dart';
 
-extension CancellableFuture<T> on Future<T> {
+extension CancellableFutureExt<T> on Future<T> {
   Future<T> bindCancellable(Cancellable cancellable,
       {bool throwWhenCancel = false}) {
-    if (cancellable.isUnavailable) {
-      if (cancellable.isCancelled && throwWhenCancel) {
-        return Future.error(
-            CancelledException(cancellable.reason), StackTrace.current);
-      }
+    if (cancellable.isUnavailable && !throwWhenCancel) {
       return NeverExecFuture<T>();
     }
+
     var completer = Completer<T>.sync();
+
+    if (throwWhenCancel) {
+      cancellable.onCancel.then((value) {
+        if (!completer.isCompleted)
+          completer.completeError(CancelledException(value), StackTrace.empty);
+      });
+    }
+
     this.then((value) {
-      if (cancellable.isAvailable) {
+      if (cancellable.isAvailable && !completer.isCompleted) {
         completer.complete(value);
       }
     });
+
     this.catchError((err, st) {
-      if (cancellable.isAvailable) {
+      if (cancellable.isAvailable && !completer.isCompleted) {
         completer.completeError(err, st);
       }
-      return Future<T>.value();
+      return Future<T>.error(err, st);
     });
-    if (throwWhenCancel) {
-      cancellable.whenCancel.then((value) =>
-          completer.completeError(CancelledException(value), StackTrace.empty));
-    }
-    this.whenComplete(() => cancellable.release());
     return completer.future;
   }
 }
