@@ -15,8 +15,9 @@ extension CancellableFutureExt<T> on Future<T> {
 
     if (throwWhenCancel) {
       cancellable.onCancel.then((value) {
-        if (!completer.isCompleted)
+        if (!completer.isCompleted) {
           completer.completeError(CancelledException(value), StackTrace.empty);
+        }
       });
     }
 

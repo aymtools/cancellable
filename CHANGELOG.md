@@ -1,6 +1,10 @@
+## 1.1.6
+
+* 扩展一个runCancellableZoned在该zone中如果cancel后，所有的注册事件统统不执行
+
 ## 1.1.5
 
-* 增加Cancellable中的WeakSet的初始化，使用时才进行初始化优化内存占用
+* 优化Cancellable中的WeakSet的初始化，使用时才进行初始化优化内存占用
 * 调整Cancellable.bindCancellable时throwWhenCancel=true，部分情况未抛出异常
 * Stream的扩展统一使用bindCancellable
 * Cancellable.release由于可能存在cancel链，直接释放可能导致其他问题，现标注过时，未来将会移除
