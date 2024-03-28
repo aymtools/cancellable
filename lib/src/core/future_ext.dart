@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:cancellable/cancellable.dart';
-
 import 'cancellable.dart';
 
 extension CancellableFutureExt<T> on Future<T> {
@@ -16,7 +14,7 @@ extension CancellableFutureExt<T> on Future<T> {
     if (throwWhenCancel) {
       cancellable.onCancel.then((value) {
         if (!completer.isCompleted) {
-          completer.completeError(CancelledException(value), StackTrace.empty);
+          completer.completeError(value, StackTrace.empty);
         }
       });
     }

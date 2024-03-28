@@ -1,9 +1,24 @@
 import 'dart:async';
 
+import 'cancellable_zone.dart';
+
 import 'cancellable.dart';
 
 extension CancellableStream<T> on Stream<T> {
   Stream<T> bindCancellable(Cancellable cancellable,
+      {bool closeWhenCancel = true}) {
+    var result = this;
+    runWhenCancellableZone((cancellableZone) => result =
+        runNotInCancellableZone(() => result._bindCancellable(cancellableZone,
+            closeWhenCancel: closeWhenCancel)));
+
+    return runNotInCancellableZone(() {
+      return result._bindCancellable(cancellable,
+          closeWhenCancel: closeWhenCancel);
+    });
+  }
+
+  Stream<T> _bindCancellable(Cancellable cancellable,
       {bool closeWhenCancel = true}) {
     Stream<T> bind(Stream<T> stream) {
       late StreamController<T> controller;
@@ -52,6 +67,8 @@ extension CancellableStream<T> on Stream<T> {
     return this.transform(StreamTransformer.fromBind(bind));
   }
 
+  /// use [Stream.bindCancellable]
+  @deprecated
   StreamSubscription<T> listenC({
     required Cancellable cancellable,
     required void onData(T event),
@@ -68,6 +85,8 @@ extension CancellableStream<T> on Stream<T> {
     return sub;
   }
 
+  /// use [Stream.bindCancellable]
+  @deprecated
   StreamSubscription<T> listenCC(
     void onData(T event), {
     required Cancellable cancellable,
@@ -86,42 +105,46 @@ extension CancellableStream<T> on Stream<T> {
 }
 
 extension CancellableStreamController<T> on StreamController<T> {
-  StreamController<T> cancelByCancellable(Cancellable cancellable) {
-    cancellable.whenCancel.then((_) => this.onCancel?.call());
-    return this;
-  }
+  /// use [StreamController.bindCancellable]
+  @deprecated
+  StreamController<T> cancelByCancellable(Cancellable cancellable) =>
+      bindCancellable(cancellable, closeWhenCancel: false);
 
-  StreamController<T> closeByCancellable(Cancellable cancellable) {
-    cancellable.whenCancel.then((_) => this.close.call());
-    return this;
-  }
+  /// use [StreamController.bindCancellable]
+  @deprecated
+  StreamController<T> closeByCancellable(Cancellable cancellable) =>
+      bindCancellable(cancellable, closeWhenCancel: true);
 
-  StreamController<T> bindCancellable(Cancellable cancellable) {
-    cancellable.whenCancel.then((_) => this.close.call());
+  StreamController<T> bindCancellable(Cancellable cancellable,
+      {bool closeWhenCancel = true}) {
+    runNotInCancellableZone(() => cancellable.whenCancel.then(
+        (_) => closeWhenCancel ? this.close.call() : this.onCancel?.call()));
     return this;
   }
 }
 
 extension CancellableStreamSinkr<T> on StreamSink<T> {
-  StreamSink<T> closeByCancellable(Cancellable cancellable) {
-    cancellable.whenCancel.then((_) => this.close.call());
-    return this;
-  }
+  /// use [StreamSink.bindCancellable]
+  @deprecated
+  StreamSink<T> closeByCancellable(Cancellable cancellable) =>
+      bindCancellable(cancellable);
 
   StreamSink<T> bindCancellable(Cancellable cancellable) {
-    cancellable.whenCancel.then((_) => this.close.call());
+    runNotInCancellableZone(
+        () => cancellable.whenCancel.then((_) => this.close.call()));
     return this;
   }
 }
 
 extension CancellableStreamSubscription<T> on StreamSubscription<T> {
-  StreamSubscription<T> cancelByCancellable(Cancellable cancellable) {
-    cancellable.onCancel.then((_) => this.cancel());
-    return this;
-  }
+  /// use [StreamSubscription.bindCancellable]
+  @deprecated
+  StreamSubscription<T> cancelByCancellable(Cancellable cancellable) =>
+      bindCancellable(cancellable);
 
   StreamSubscription<T> bindCancellable(Cancellable cancellable) {
-    cancellable.onCancel.then((_) => this.cancel());
+    runNotInCancellableZone(
+        () => cancellable.onCancel.then((_) => this.cancel()));
     return this;
   }
 }

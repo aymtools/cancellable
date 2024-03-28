@@ -1,5 +1,6 @@
-## 1.1.6
+## 2.0.0
 
+* 移除Cancellable.release
 * 扩展一个runCancellableZoned在该zone中如果cancel后，所有的注册事件统统不执行
 
 ## 1.1.5
