@@ -1,7 +1,4 @@
-import 'dart:async';
-
 import 'cancellable.dart';
-import 'cancelled_exception.dart';
 
 Map<Cancellable, Cancellable> _binds = {};
 

@@ -174,7 +174,7 @@ R? runCancellableZoned<R>(
         fork: forkZoneWithCancellable ? null : fork,
       ),
     );
-  },  (error, stack) {
+  }, (error, stack) {
     if (error != cancellable.reasonAsException)
       Zone.current.parent?.handleUncaughtError(error, stack);
   });
