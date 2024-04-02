@@ -10,7 +10,7 @@ dynamic _nullUnaryCallback() {}
 
 dynamic _nullBinaryCallback() {}
 
-final dynamic _nullFuture = Zone.root.run(() => Future.value(null));
+// final dynamic _nullFuture = Zone.root.run(() => Future.value(null));
 
 class _Token<T> {
   Type typeOf() => T;
@@ -27,12 +27,12 @@ R _makeFuture<R>() => Future<Never>.error('') as R;
 //                 Object error, StackTrace stackTrace) {}))
 //     .registerCallback(() => throw '')();
 
-late final Never _neverReturn = Zone.root
-    .fork(
-        specification: ZoneSpecification(
-            handleUncaughtError: (Zone self, ZoneDelegate parent, Zone zone,
-                Object error, StackTrace stackTrace) {}))
-    .run(() => throw '');
+// late final Never _neverReturn = Zone.root
+//     .fork(
+//         specification: ZoneSpecification(
+//             handleUncaughtError: (Zone self, ZoneDelegate parent, Zone zone,
+//                 Object error, StackTrace stackTrace) {}))
+//     .run(() => throw '');
 
 R? runCancellableZoned<R>(
   R body(), {
@@ -159,25 +159,25 @@ R? runCancellableZoned<R>(
       fork: forkZoneWithCancellable ? null : fork,
     ),
   );
-  return runZonedGuarded(() {
-    return runZoned(
-      body,
-      zoneValues: zValues,
-      zoneSpecification: ZoneSpecification(
-        run: runHandler,
-        runUnary: runUnary,
-        runBinary: runBinary,
-        registerCallback: registerCallback,
-        registerUnaryCallback: registerUnaryCallback,
-        registerBinaryCallback: registerBinaryCallback,
-        handleUncaughtError: handleUncaughtError,
-        fork: forkZoneWithCancellable ? null : fork,
-      ),
-    );
-  }, (error, stack) {
-    if (error != cancellable.reasonAsException)
-      Zone.current.parent?.handleUncaughtError(error, stack);
-  });
+  // return runZonedGuarded(() {
+  //   return runZoned(
+  //     body,
+  //     zoneValues: zValues,
+  //     zoneSpecification: ZoneSpecification(
+  //       run: runHandler,
+  //       runUnary: runUnary,
+  //       runBinary: runBinary,
+  //       registerCallback: registerCallback,
+  //       registerUnaryCallback: registerUnaryCallback,
+  //       registerBinaryCallback: registerBinaryCallback,
+  //       handleUncaughtError: handleUncaughtError,
+  //       fork: forkZoneWithCancellable ? null : fork,
+  //     ),
+  //   );
+  // }, (error, stack) {
+  //   if (error != cancellable.reasonAsException)
+  //     Zone.current.parent?.handleUncaughtError(error, stack);
+  // });
 }
 
 class _ZoneKey {
@@ -189,7 +189,7 @@ class _ZoneKey {
 const _ZoneKey _cancellableKey = _ZoneKey('cancellable');
 
 extension CancellableZoneCheck on Zone {
-  bool get isCancellableZone => this[_cancellableKey] == null;
+  bool get isCancellableZone => this[_cancellableKey] != null;
 
   bool get isCancellableActive {
     if (isCancellableZone) {
