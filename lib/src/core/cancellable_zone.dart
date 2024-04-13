@@ -1,8 +1,7 @@
 import 'dart:async';
 
 import 'cancellable.dart';
-import 'cancelled_exception.dart';
-import 'tools/current.dart';
+import '../exception/cancelled_exception.dart';
 
 dynamic _nullCallback() {}
 
@@ -208,7 +207,7 @@ extension CancellableZoneCheck on Zone {
 }
 
 R runNotInCancellableZone<R>(R Function() action) {
-  var zone = current.zone;
+  var zone = Zone.current;
   while (zone.isCancellableZone) {
     zone = zone.parent!;
   }
@@ -217,7 +216,7 @@ R runNotInCancellableZone<R>(R Function() action) {
 
 ///若当前zone是CancellableZone则会执行action 如果不是则直接跳过action
 void runWhenCancellableZone(void Function(Cancellable cancellable) action) {
-  final zone = current.zone;
+  final zone = Zone.current;
   if (zone.isCancellableZone && zone._requiredCancellable.isAvailable) {
     action(zone._requiredCancellable.makeCancellable());
   }

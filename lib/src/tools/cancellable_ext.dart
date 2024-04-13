@@ -1,6 +1,4 @@
-import 'cancellable.dart';
-
-// Map<Cancellable, Cancellable> _binds = {};
+import 'package:cancellable/src/core/cancellable.dart';
 
 extension CancellableExt on Cancellable {
   Cancellable bindCancellable(Cancellable? cancellable) {

@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:cancellable/cancellable.dart';
-import 'package:cancellable/src/core/tools/current.dart';
+import 'package:cancellable/src/tools/current.dart';
 
 main() async {
   Cancellable cancellable = Cancellable();
 
-  // Stream.periodic(Duration(milliseconds: 100), (i) => i)
-  //     .bindCancellable(cancellable.makeCancellable())
-  //     .listen((event) => print(event));
+  Stream.periodic(Duration(milliseconds: 100), (i) => i)
+      .bindCancellable(cancellable.makeCancellable())
+      .listen((event) => print(event));
 
   // 在其他任意的地方执行取消
   Future.delayed(Duration(seconds: 1)).then((value) => cancellable.cancel());

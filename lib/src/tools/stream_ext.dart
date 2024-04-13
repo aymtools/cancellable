@@ -1,8 +1,7 @@
 import 'dart:async';
 
-import 'cancellable_zone.dart';
-
-import 'cancellable.dart';
+import 'package:cancellable/src/core/cancellable.dart';
+import 'package:cancellable/src/core/cancellable_zone.dart';
 
 extension CancellableStream<T> on Stream<T> {
   Stream<T> bindCancellable(Cancellable cancellable,

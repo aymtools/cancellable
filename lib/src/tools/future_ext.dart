@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'cancellable.dart';
+import 'package:cancellable/src/core/cancellable.dart';
+import 'package:cancellable/src/tools/never_exec_future.dart';
 
 extension CancellableFutureExt<T> on Future<T> {
   Future<T> bindCancellable(Cancellable cancellable,
