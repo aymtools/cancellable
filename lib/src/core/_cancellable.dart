@@ -81,16 +81,19 @@ class _Cancellable implements Cancellable {
   }
 
   void _addToCache(_Cancellable cancellable) {
-    _caches ??= WeakSet<_Cancellable>();
+    _caches ??= WeakSet<Cancellable>();
     _caches?.add(cancellable);
-    cancellable.onCancel.then((value) => _caches?.remove(this));
+
+    WeakReference<Set<Cancellable>> _weakCache = WeakReference(_caches!);
+    cancellable.onCancel.then((value) => _weakCache.target?.remove(this));
   }
 
   void _bindParent(Cancellable? parent) {
     if (parent is _Cancellable) {
       parent._addToCache(this);
     } else {
-      parent?.onCancel.then((value) => this._cancel(value));
+      WeakReference<_Cancellable> weakThis = WeakReference(this);
+      parent?.onCancel.then((value) => weakThis.target?._cancel(value));
     }
   }
 }
