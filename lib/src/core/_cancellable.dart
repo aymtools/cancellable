@@ -4,6 +4,7 @@ part of 'cancellable.dart';
 @pragma('vm:isolate-unsendable')
 class _Cancellable implements Cancellable {
   final Completer<CancelledException> _completer = Completer.sync();
+  final Completer<CancelledException> _completerAsync = Completer();
 
   Set<Cancellable>? _caches;
 
@@ -37,6 +38,7 @@ class _Cancellable implements Cancellable {
     _reason = reason;
 
     _completer.complete(reasonAsException);
+    _completerAsync.complete(reasonAsException);
     _caches
         ?.where((element) => element.isAvailable)
         .forEach((element) => element.cancel(reasonAsException));

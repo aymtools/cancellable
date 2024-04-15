@@ -50,6 +50,8 @@ mixin CancellableMixin implements Cancellable {
       _delegate.makeCancellable(father: father, infectious: infectious);
 }
 
+// Expando<Completer<CancelledException>> _whenCancel = Expando();
+
 extension CancellableSupport on Cancellable {
   ///是否已经取消
   ///使用 [isAvailable] 或 [isUnavailable] 代替
@@ -64,6 +66,11 @@ extension CancellableSupport on Cancellable {
   bool get isUnavailable => !isAvailable;
 
   ///当取消时的处理 异步模式 需要等下一次事件循环
-  Future<CancelledException> get whenCancel =>
-      Future<CancelledException>(() => onCancel);
+  Future<CancelledException> get whenCancel {
+    if (this is _Cancellable) return (this as _Cancellable).whenCancel;
+    //将同步的转换为异步的cancel
+    Completer<CancelledException> whenCancel = Completer();
+    onCancel.then((value) => whenCancel.complete(value));
+    return whenCancel.future;
+  }
 }
