@@ -67,7 +67,9 @@ extension CancellableSupport on Cancellable {
 
   ///当取消时的处理 异步模式 需要等下一次事件循环
   Future<CancelledException> get whenCancel {
-    if (this is _Cancellable) return (this as _Cancellable).whenCancel;
+    if (this is _Cancellable) {
+      return (this as _Cancellable)._completerAsync.future;
+    }
     //将同步的转换为异步的cancel
     Completer<CancelledException> whenCancel = Completer();
     onCancel.then((value) => whenCancel.complete(value));
