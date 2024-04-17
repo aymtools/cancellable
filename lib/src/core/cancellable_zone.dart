@@ -9,8 +9,6 @@ dynamic _nullUnaryCallback() {}
 
 dynamic _nullBinaryCallback() {}
 
-// final dynamic _nullFuture = Zone.root.run(() => Future.value(null));
-
 class _Token<T> {
   Type typeOf() => T;
 }
@@ -50,10 +48,7 @@ R? runCancellableZoned<R>(
     if (cancellable.isAvailable) {
       return parent.run(zone, f);
     }
-    // throw cancellable.reasonAsException!;
     self.handleUncaughtError(cancellable.reasonAsException!, StackTrace.empty);
-    print(
-        'Zone runHandler curr:${Zone.current.hashCode} self:${self.hashCode} parent:${parent.hashCode} zone:${zone.hashCode} 0');
     return isFuture<R1>() ? _makeFuture() : null as R1;
   }
 
@@ -62,10 +57,7 @@ R? runCancellableZoned<R>(
     if (cancellable.isAvailable) {
       return parent.runUnary(zone, f, arg);
     }
-    // throw cancellable.reasonAsException!;
     self.handleUncaughtError(cancellable.reasonAsException!, StackTrace.empty);
-    print(
-        'Zone runUnary self:${self.hashCode} parent:${parent.hashCode} zone:${zone.hashCode} 1');
     return isFuture<R1>() ? _makeFuture() : null as R1;
   }
 
@@ -74,10 +66,7 @@ R? runCancellableZoned<R>(
     if (cancellable.isAvailable) {
       return parent.runBinary(zone, f, arg1, arg2);
     }
-    // throw cancellable.reasonAsException!;
     self.handleUncaughtError(cancellable.reasonAsException!, StackTrace.empty);
-    print(
-        'Zone runBinary self:${self.hashCode} parent:${parent.hashCode} zone:${zone.hashCode} 2');
     return isFuture<R1>() ? _makeFuture() : null as R1;
   }
 
@@ -86,9 +75,6 @@ R? runCancellableZoned<R>(
     if (cancellable.isAvailable) {
       return parent.registerCallback(zone, f);
     }
-    // throw cancellable.reasonAsException!;
-    print(
-        'Zone registerCallback curr:${Zone.current.hashCode} self:${self.hashCode} parent:${parent.hashCode} zone:${zone.hashCode} 2');
     self.handleUncaughtError(cancellable.reasonAsException!, StackTrace.empty);
     return _nullCallback();
   }
@@ -98,9 +84,6 @@ R? runCancellableZoned<R>(
     if (cancellable.isAvailable) {
       return parent.registerUnaryCallback(zone, f);
     }
-    // throw cancellable.reasonAsException!;
-    print(
-        'Zone registerUnaryCallback curr:${Zone.current.hashCode} self:${self.hashCode} parent:${parent.hashCode} zone:${zone.hashCode} 2');
     self.handleUncaughtError(cancellable.reasonAsException!, StackTrace.empty);
     return _nullUnaryCallback();
   }
@@ -110,10 +93,6 @@ R? runCancellableZoned<R>(
     if (cancellable.isAvailable) {
       return parent.registerBinaryCallback(zone, f);
     }
-    // throw cancellable.reasonAsException!;
-    print(
-        'Zone registerBinaryCallback curr:${Zone.current.hashCode} self:${self.hashCode} parent:${parent.hashCode} zone:${zone.hashCode} 2');
-
     self.handleUncaughtError(cancellable.reasonAsException!, StackTrace.empty);
     return _nullBinaryCallback();
   }
@@ -121,7 +100,6 @@ R? runCancellableZoned<R>(
   bool isFirst = true;
   void handleUncaughtError(
       Zone self, ZoneDelegate parent, Zone zone, err, StackTrace stackTrace) {
-    // print('handleUncaughtError $err $stackTrace');
     if (err == cancellable.reasonAsException) {
       if (isFirst) {
         if (!ignoreCancelledException) {
