@@ -1,3 +1,8 @@
+## 2.0.1
+
+* 新增 CancellableEvery 所有的able执行完取消才会取消group
+* 新增 CancellableAny 任意一个able的取消都会导致所有的able执行取消
+
 ## 2.0.0
 
 * 移除Cancellable.release
