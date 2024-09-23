@@ -1,4 +1,6 @@
+/// 当取消后将原因转换为异常
 class CancelledException implements Exception {
+  /// 原始原因
   final dynamic reason;
 
   CancelledException([this.reason]);

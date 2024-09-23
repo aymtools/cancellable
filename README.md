@@ -1,6 +1,8 @@
 # cancellable
 
 This package provides a capability for cancellation.
+This feature allows termination or revocation of operations through a certain mechanism during task
+execution.
 
 ## Usage
 
@@ -55,11 +57,11 @@ main() {
 }
 ```
 
-See [example](https://github.com/aymtools/cancellable/blob/master/example/cancellable_example.dart)
+See [example](https://github.com/aymtools/cancellable/blob/master/example/example.dart)
 for detailed test case.
 
 For more usage in flutter,
-see:[aymtools](https://github.com/aymtools/flutter_aymtools)
+see:[an_lifecycle_cancellable](https://pub.dev/packages/an_lifecycle_cancellable)
 
 ## Issues
 

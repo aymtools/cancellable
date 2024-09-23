@@ -4,6 +4,7 @@ import 'package:cancellable/src/core/cancellable.dart';
 import 'package:cancellable/src/core/cancellable_zone.dart';
 
 extension CancellableStream<T> on Stream<T> {
+  /// 将stream关联到 Cancellable cancel后自动解绑
   Stream<T> bindCancellable(Cancellable cancellable,
       {bool closeWhenCancel = true}) {
     var result = this;
@@ -66,6 +67,7 @@ extension CancellableStream<T> on Stream<T> {
     return this.transform(StreamTransformer.fromBind(bind));
   }
 
+  /// 自动取消 StreamSubscription
   /// use [Stream.bindCancellable]
   @deprecated
   StreamSubscription<T> listenC({
@@ -84,6 +86,7 @@ extension CancellableStream<T> on Stream<T> {
     return sub;
   }
 
+  /// 自动取消 StreamSubscription
   /// use [Stream.bindCancellable]
   @deprecated
   StreamSubscription<T> listenCC(
@@ -104,16 +107,19 @@ extension CancellableStream<T> on Stream<T> {
 }
 
 extension CancellableStreamController<T> on StreamController<T> {
+  /// 绑定到 Cancellable
   /// use [StreamController.bindCancellable]
   @deprecated
   StreamController<T> cancelByCancellable(Cancellable cancellable) =>
       bindCancellable(cancellable, closeWhenCancel: false);
 
+  /// 绑定到 Cancellable
   /// use [StreamController.bindCancellable]
   @deprecated
   StreamController<T> closeByCancellable(Cancellable cancellable) =>
       bindCancellable(cancellable, closeWhenCancel: true);
 
+  /// 绑定到 Cancellable cancel时 closeWhenCancel=true close 否则取消
   StreamController<T> bindCancellable(Cancellable cancellable,
       {bool closeWhenCancel = true}) {
     runNotInCancellableZone(() => cancellable.whenCancel.then(
@@ -123,11 +129,13 @@ extension CancellableStreamController<T> on StreamController<T> {
 }
 
 extension CancellableStreamSinkr<T> on StreamSink<T> {
+  /// 绑定到 Cancellable
   /// use [StreamSink.bindCancellable]
   @deprecated
   StreamSink<T> closeByCancellable(Cancellable cancellable) =>
       bindCancellable(cancellable);
 
+  /// 绑定到 Cancellable cancel时close
   StreamSink<T> bindCancellable(Cancellable cancellable) {
     runNotInCancellableZone(
         () => cancellable.whenCancel.then((_) => this.close.call()));
@@ -136,11 +144,13 @@ extension CancellableStreamSinkr<T> on StreamSink<T> {
 }
 
 extension CancellableStreamSubscription<T> on StreamSubscription<T> {
+  /// 绑定到 Cancellable
   /// use [StreamSubscription.bindCancellable]
   @deprecated
   StreamSubscription<T> cancelByCancellable(Cancellable cancellable) =>
       bindCancellable(cancellable);
 
+  /// 绑定到 Cancellable cancel时取消
   StreamSubscription<T> bindCancellable(Cancellable cancellable) {
     runNotInCancellableZone(
         () => cancellable.onCancel.then((_) => this.cancel()));

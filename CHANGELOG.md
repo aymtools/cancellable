@@ -1,79 +1,90 @@
+## 2.1.0
+
+* The base management of `CancellableGroup` changed to `Set`
+
 ## 2.0.1
 
-* 新增 CancellableEvery 所有的able执行完取消才会取消group
-* 新增 CancellableAny 任意一个able的取消都会导致所有的able执行取消
+* Added `CancellableEvery`, the group will be canceled only after all `ables` are executed
+* Added `CancellableAny`, canceling any `able` will result in canceling the execution of all `ables`
 
 ## 2.0.0
 
-* 移除Cancellable.release
-* 扩展一个runCancellableZoned在该zone中如果cancel后，所有的注册事件统统不执行
-* 将Cancellable抽象为接口
-* byXXX统一为bindCancellable
+* Removed `Cancellable.release`
+* Added a new `runCancellableZoned`, within this zone, all registered events will not execute after
+  a cancel
+* Abstracted `Cancellable` as an interface
+* Unified `byXXX` to `bindCancellable`
 
 ## 1.1.5
 
-* 优化Cancellable中的WeakSet的初始化，使用时才进行初始化优化内存占用
-* 调整Cancellable.bindCancellable时throwWhenCancel=true，部分情况未抛出异常
-* Stream的扩展统一使用bindCancellable
-* Cancellable.release由于可能存在cancel链，直接释放可能导致其他问题，现标注过时，未来将会移除
+* Optimized `WeakSet` initialization in `Cancellable`, now it initializes only when used to reduce
+  memory usage
+* Fixed some cases where no exception was thrown when `throwWhenCancel=true`
+  during `Cancellable.bindCancellable`
+* Unified `Stream` extensions to use `bindCancellable`
+* `Cancellable.release` is marked as deprecated due to possible cancel chains, and releasing
+  directly could lead to issues. It will be removed in future versions.
 
 ## 1.1.4
 
-* Future.bindCancellable时允许以抛出异常[CancelledException]的方式继续
+* Allowed throwing `[CancelledException]` to continue during `Future.bindCancellable`
 
 ## 1.1.3
 
-* 修正Stream.bindCancellable时特殊情况cancel未关闭
+* Fixed the issue where `Stream.bindCancellable` did not close during certain cancellation scenarios
 
 ## 1.1.2
 
-* 增加Cancellable.bindCancellable,互相绑定后任意一个取消的同时会去取消另一个
+* Added `Cancellable.bindCancellable`, where canceling either one will also cancel the other when
+  bound
 
 ## 1.1.1
 
-* 修复Stream.bindCancellable时部分情况未初始化，
-* Stream.bindCancellable默认closeWhenCancel = true
+* Fixed some cases where `Stream.bindCancellable` was not initialized properly
+* `Stream.bindCancellable` now defaults to `closeWhenCancel = true`
 
 ## 1.1.0
 
-* 声明Cancellable不可跨isolate使用
+* Declared that `Cancellable` cannot be used across `isolates`
 
 ## 1.0.9
 
-* 新增定义已取消时可用的抛出异常
+* Added an exception definition for when already canceled
 
 ## 1.0.8
 
-* 执行取消时可以传递被取消的原因
+* Now supports passing the reason for cancellation when executing cancel
 
 ## 1.0.7
 
-* 当canceled 生成孩子的时,使用 Future.microtask() 提升执行cancel的时机
+* When a canceled task spawns children, `Future.microtask()` is used to improve the timing of
+  cancellation execution
 
 ## 1.0.6
 
-* Cancellable新增同步的cancel回调onCancel
+* Added synchronous cancel callback `onCancel` to `Cancellable`
 
 ## 1.0.5
 
-* 更新库说明，更新child的Cancellable的软引用，使执行效率更高
+* Updated library documentation, updated soft references in child `Cancellable` to improve execution
+  efficiency
 
 ## 1.0.4
 
-* 新增stream的易用性扩展
+* Added stream usability extensions
 
 ## 1.0.3
 
-* 新增可用性判断，新增future和stream工具
+* Added availability checks, along with new tools for `future` and `stream`
 
 ## 1.0.2
 
-* 新增释放资源功能，cancel相关功能取消
+* Added resource release functionality, canceled related functions removed
 
 ## 1.0.1
 
-* 优化软引用，以便及时回收
+* Optimized soft references to facilitate timely garbage collection
 
 ## 1.0.0
 
-* 第一个版本发布
+* First version release

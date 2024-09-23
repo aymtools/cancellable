@@ -4,6 +4,7 @@ import 'package:cancellable/src/core/cancellable.dart';
 import 'package:cancellable/src/tools/never_exec_future.dart';
 
 extension CancellableFutureExt<T> on Future<T> {
+  /// 将future 关联到 Cancellable 当cancel后 不执行then 和 err
   Future<T> bindCancellable(Cancellable cancellable,
       {bool throwWhenCancel = false}) {
     if (cancellable.isUnavailable && !throwWhenCancel) {

@@ -3,7 +3,7 @@ import 'package:cancellable/src/exception/cancelled_exception.dart';
 
 /// 一个可管理一组able的管理器
 abstract class _CancellableGroup implements Cancellable {
-  final List<Cancellable> _cancellableList = [];
+  final Set<Cancellable> _cancellableList = {};
 
   late final Cancellable _manager = () {
     return Cancellable()

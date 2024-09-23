@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'cancellable.dart';
 import '../exception/cancelled_exception.dart';
+import 'cancellable.dart';
 
 dynamic _nullCallback() {}
 
@@ -31,6 +31,7 @@ R _makeFuture<R>() => Future<Never>.error('') as R;
 //                 Object error, StackTrace stackTrace) {}))
 //     .run(() => throw '');
 
+/// 利用cancellable绑定到zone 当cancel后zone所有的注册事件将不会调用
 R? runCancellableZoned<R>(
   R body(), {
   Map<Object?, Object?>? zoneValues,
@@ -166,8 +167,10 @@ class _ZoneKey {
 const _ZoneKey _cancellableKey = _ZoneKey('cancellable');
 
 extension CancellableZoneCheck on Zone {
+  /// 检查当前zone是否为 CancellableZone
   bool get isCancellableZone => this[_cancellableKey] != null;
 
+  /// 检查当前CancellableZone 是否是 isAvailable状态  如果不是CancellableZone则返回false
   bool get isCancellableActive {
     if (isCancellableZone) {
       return _requiredCancellable.isAvailable;
@@ -175,6 +178,7 @@ extension CancellableZoneCheck on Zone {
     return true;
   }
 
+  /// 检查当前CancellableZone 是否是 isUnavailable状态 如果是则直接抛出异常 如果不是CancellableZone不执行任何操作
   void ensureCancellableActive() {
     if (!isCancellableActive) {
       throw _requiredCancellable.reasonAsException ?? CancelledException();
@@ -184,6 +188,7 @@ extension CancellableZoneCheck on Zone {
   Cancellable get _requiredCancellable => this[_cancellableKey]!;
 }
 
+/// 必须不能运行在CancellableZone 如果是则寻找器parent
 R runNotInCancellableZone<R>(R Function() action) {
   var zone = Zone.current;
   while (zone.isCancellableZone) {
@@ -201,6 +206,7 @@ void runWhenCancellableZone(void Function(Cancellable cancellable) action) {
 }
 
 extension CancellableRunZone on Cancellable {
+  /// 将使用当前Cancellable 执行runZone
   R? withRunZone<R>(
     R body(), {
     Map<Object?, Object?>? zoneValues,
