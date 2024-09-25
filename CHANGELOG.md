@@ -1,3 +1,7 @@
+## 2.1.1
+
+* Upgrade the dependency version of weak_collections.
+
 ## 2.1.0
 
 * The base management of `CancellableGroup` changed to `Set`

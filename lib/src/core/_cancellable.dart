@@ -83,7 +83,7 @@ class _Cancellable implements Cancellable {
   }
 
   void _addToCache(_Cancellable cancellable) {
-    _caches ??= WeakSet<Cancellable>();
+    _caches ??= WeakHashSet<Cancellable>();
     _caches?.add(cancellable);
 
     WeakReference<Set<Cancellable>> _weakCache = WeakReference(_caches!);
