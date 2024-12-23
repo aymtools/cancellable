@@ -68,8 +68,7 @@ extension CancellableStream<T> on Stream<T> {
   }
 
   /// 自动取消 StreamSubscription
-  /// use [Stream.bindCancellable]
-  @deprecated
+  @Deprecated('use bindCancellable')
   StreamSubscription<T> listenC({
     required Cancellable cancellable,
     required void onData(T event),
@@ -87,8 +86,7 @@ extension CancellableStream<T> on Stream<T> {
   }
 
   /// 自动取消 StreamSubscription
-  /// use [Stream.bindCancellable]
-  @deprecated
+  @Deprecated('use bindCancellable')
   StreamSubscription<T> listenCC(
     void onData(T event), {
     required Cancellable cancellable,
@@ -108,14 +106,12 @@ extension CancellableStream<T> on Stream<T> {
 
 extension CancellableStreamController<T> on StreamController<T> {
   /// 绑定到 Cancellable
-  /// use [StreamController.bindCancellable]
-  @deprecated
+  @Deprecated('use bindCancellable')
   StreamController<T> cancelByCancellable(Cancellable cancellable) =>
       bindCancellable(cancellable, closeWhenCancel: false);
 
   /// 绑定到 Cancellable
-  /// use [StreamController.bindCancellable]
-  @deprecated
+  @Deprecated('use bindCancellable')
   StreamController<T> closeByCancellable(Cancellable cancellable) =>
       bindCancellable(cancellable, closeWhenCancel: true);
 
@@ -130,8 +126,7 @@ extension CancellableStreamController<T> on StreamController<T> {
 
 extension CancellableStreamSinkr<T> on StreamSink<T> {
   /// 绑定到 Cancellable
-  /// use [StreamSink.bindCancellable]
-  @deprecated
+  @Deprecated('use bindCancellable')
   StreamSink<T> closeByCancellable(Cancellable cancellable) =>
       bindCancellable(cancellable);
 
@@ -145,8 +140,7 @@ extension CancellableStreamSinkr<T> on StreamSink<T> {
 
 extension CancellableStreamSubscription<T> on StreamSubscription<T> {
   /// 绑定到 Cancellable
-  /// use [StreamSubscription.bindCancellable]
-  @deprecated
+  @Deprecated('use bindCancellable')
   StreamSubscription<T> cancelByCancellable(Cancellable cancellable) =>
       bindCancellable(cancellable);
 

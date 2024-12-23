@@ -59,7 +59,7 @@ extension CancellableSupport on Cancellable {
   bool get isCancelled => isUnavailable;
 
   ///请使用 [reasonAsException]
-  @deprecated
+  @Deprecated('use reasonAsException')
   dynamic get reason => reasonAsException?.reason;
 
   /// 当前是否是不可用状态

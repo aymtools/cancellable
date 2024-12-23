@@ -1,3 +1,7 @@
+## 2.1.2
+
+* Improve some Deprecated descriptions
+
 ## 2.1.1
 
 * Upgrade the dependency version of weak_collections.
