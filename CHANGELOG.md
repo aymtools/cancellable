@@ -1,3 +1,7 @@
+## 2.1.3
+
+* Fix the bugs related to registerXXX in CancellableZoned.
+
 ## 2.1.2
 
 * Improve some Deprecated descriptions

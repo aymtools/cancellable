@@ -3,11 +3,11 @@ import 'dart:async';
 import '../exception/cancelled_exception.dart';
 import 'cancellable.dart';
 
-dynamic _nullCallback() {}
-
-dynamic _nullUnaryCallback() {}
-
-dynamic _nullBinaryCallback() {}
+// dynamic _nullCallback() {}
+//
+// dynamic _nullUnaryCallback() {}
+//
+// dynamic _nullBinaryCallback() {}
 
 class _Token<T> {
   Type typeOf() => T;
@@ -31,7 +31,7 @@ R _makeFuture<R>() => Future<Never>.error('') as R;
 //                 Object error, StackTrace stackTrace) {}))
 //     .run(() => throw '');
 
-/// 利用cancellable绑定到zone 当cancel后zone所有的注册事件将不会调用
+/// 利用cancellable绑定到zone 当cancel后zone所有的注册事件将不会调用 包含stream 的close 等相关的回调
 R? runCancellableZoned<R>(
   R body(), {
   Map<Object?, Object?>? zoneValues,
@@ -72,30 +72,34 @@ R? runCancellableZoned<R>(
   }
 
   R1 Function() registerCallback<R1>(
-      Zone self, ZoneDelegate parent, Zone zone, R1 Function() f) {
-    if (cancellable.isAvailable) {
-      return parent.registerCallback(zone, f);
-    }
-    self.handleUncaughtError(cancellable.reasonAsException!, StackTrace.empty);
-    return _nullCallback();
-  }
+          Zone self, ZoneDelegate parent, Zone zone, R1 Function() f) =>
+      parent.registerCallback(zone, () {
+        if (cancellable.isUnavailable) {
+          self.handleUncaughtError(
+              cancellable.reasonAsException!, StackTrace.empty);
+        }
+        return f();
+      });
 
   R1 Function(T1) registerUnaryCallback<R1, T1>(
-      Zone self, ZoneDelegate parent, Zone zone, R1 Function(T1) f) {
-    if (cancellable.isAvailable) {
-      return parent.registerUnaryCallback(zone, f);
-    }
-    self.handleUncaughtError(cancellable.reasonAsException!, StackTrace.empty);
-    return _nullUnaryCallback();
-  }
+          Zone self, ZoneDelegate parent, Zone zone, R1 Function(T1) f) =>
+      parent.registerUnaryCallback(zone, (p) {
+        if (cancellable.isUnavailable) {
+          self.handleUncaughtError(
+              cancellable.reasonAsException!, StackTrace.empty);
+        }
+        return f(p);
+      });
 
   R1 Function(T1, T2) registerBinaryCallback<R1, T1, T2>(
       Zone self, ZoneDelegate parent, Zone zone, R1 Function(T1, T2) f) {
-    if (cancellable.isAvailable) {
-      return parent.registerBinaryCallback(zone, f);
-    }
-    self.handleUncaughtError(cancellable.reasonAsException!, StackTrace.empty);
-    return _nullBinaryCallback();
+    return parent.registerBinaryCallback(zone, (p1, p2) {
+      if (cancellable.isUnavailable) {
+        self.handleUncaughtError(
+            cancellable.reasonAsException!, StackTrace.empty);
+      }
+      return f(p1, p2);
+    });
   }
 
   bool isFirst = true;
@@ -188,7 +192,7 @@ extension CancellableZoneCheck on Zone {
   Cancellable get _requiredCancellable => this[_cancellableKey]!;
 }
 
-/// 必须不能运行在CancellableZone 如果是则寻找器parent
+/// 必须不能运行在CancellableZone 如果是则寻找其parent
 R runNotInCancellableZone<R>(R Function() action) {
   var zone = Zone.current;
   while (zone.isCancellableZone) {
