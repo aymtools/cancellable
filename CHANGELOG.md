@@ -1,3 +1,7 @@
+## 2.1.4
+
+* CancellableEvery and CancellableAny add new .async constructors."
+
 ## 2.1.3
 
 * Fix the bugs related to registerXXX in CancellableZoned.

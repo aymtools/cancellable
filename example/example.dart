@@ -6,12 +6,31 @@ import 'package:cancellable/src/tools/current.dart';
 main() async {
   Cancellable cancellable = Cancellable();
 
-  Stream.periodic(Duration(milliseconds: 100), (i) => i)
-      .bindCancellable(cancellable.makeCancellable())
-      .listen((event) => print(event));
+  //可用性判断
+  print('isAvailable:${cancellable.isAvailable}');
 
-  // 在其他任意的地方执行取消
-  Future.delayed(Duration(seconds: 1)).then((value) => cancellable.cancel());
+  // 同步的
+  cancellable.onCancel.then((value) {
+    print('onCancel');
+    scheduleMicrotask(() {
+      print('onCancel scheduleMicrotask');
+    });
+  });
+  // 异步的
+  cancellable.whenCancel.then((_) {
+    print('whenCancel');
+  });
+
+  /// print
+  // onCancel
+  // onCancel scheduleMicrotask
+  // whenCancel
+
+  Cancellable childCancellable = cancellable.makeCancellable();
+  // steam.bindCancellable 绑定Cancellable 当cancel时自动解除订阅
+  Stream.periodic(Duration(milliseconds: 100), (i) => i)
+      .bindCancellable(childCancellable)
+      .listen((event) => print(event));
 
   ///print
   ///0
@@ -25,6 +44,16 @@ main() async {
   // 8
   // 9
   // end
+
+  // 在其他任意的地方执行取消
+  Future.delayed(Duration(seconds: 1)).then((value) => cancellable.cancel());
+
+  // 可以获取取消的原因
+  Future.delayed(Duration(seconds: 2)).then((value) {
+    // 可以通过 cancellable.cancel(reason) 自定义缘由
+    CancelledException? exception = cancellable.reasonAsException;
+  });
+
   Cancellable cancellable2 = cancellable.makeCancellable();
   // cancellable2.cancel();
   // runZoned(() {

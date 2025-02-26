@@ -41,6 +41,18 @@ abstract class _CancellableGroup implements Cancellable {
 
 ///所有的able执行完取消才会取消group
 class CancellableEvery extends _CancellableGroup {
+  late final void Function(Cancellable) _listenCancel;
+
+  /// 所有的able执行完取消才会取消group
+  CancellableEvery() {
+    _listenCancel = _listenCancelSync;
+  }
+
+  /// 所有的able执行完取消才会取消group  使用异步模式即：对add的Cancellable使用whenCancel
+  CancellableEvery.async() {
+    _listenCancel = _listenCancelAsync;
+  }
+
   @override
   void add(Cancellable cancellable) {
     if (_manager.isUnavailable) {
@@ -49,7 +61,18 @@ class CancellableEvery extends _CancellableGroup {
     }
     if (cancellable.isUnavailable) return;
     _cancellableList.add(cancellable);
+    _listenCancel(cancellable);
+  }
+
+  void _listenCancelSync(Cancellable cancellable) {
     cancellable.onCancel.then((value) {
+      _cancellableList.remove(cancellable);
+      _check();
+    });
+  }
+
+  void _listenCancelAsync(Cancellable cancellable) {
+    cancellable.whenCancel.then((value) {
       _cancellableList.remove(cancellable);
       _check();
     });
@@ -65,6 +88,18 @@ class CancellableEvery extends _CancellableGroup {
 
 ///任意一个able的取消都会导致所有的able执行取消
 class CancellableAny extends _CancellableGroup {
+  late final void Function(Cancellable) _listenCancel;
+
+  /// 任意一个able的取消都会导致所有的able执行取消group
+  CancellableAny() {
+    _listenCancel = _listenCancelSync;
+  }
+
+  /// 任意一个able的取消都会导致所有的able执行取消group  使用异步模式即：对add的Cancellable使用whenCancel
+  CancellableAny.async() {
+    _listenCancel = _listenCancelAsync;
+  }
+
   @override
   void add(Cancellable cancellable) {
     if (_manager.isUnavailable) {
@@ -76,6 +111,14 @@ class CancellableAny extends _CancellableGroup {
       return;
     }
     _cancellableList.add(cancellable);
+    _listenCancel(cancellable);
+  }
+
+  void _listenCancelSync(Cancellable cancellable) {
     cancellable.onCancel.then((value) => _manager.cancel(value));
+  }
+
+  void _listenCancelAsync(Cancellable cancellable) {
+    cancellable.whenCancel.then((value) => _manager.cancel(value));
   }
 }
