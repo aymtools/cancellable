@@ -25,7 +25,15 @@ abstract class Cancellable {
   ///[infectious] 传染 当新的able执行取消的时候将生产者同时取消
   Cancellable makeCancellable({Cancellable? father, bool infectious = false});
 
+  ///构建器
   factory Cancellable() => _Cancellable();
+
+  /// 创建一个默认已经取消的 Cancellable
+  factory Cancellable.cancelled([dynamic reason]) {
+    final result = _Cancellable();
+    result.cancel(reason);
+    return result;
+  }
 }
 
 mixin CancellableMixin implements Cancellable {

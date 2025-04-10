@@ -1,6 +1,10 @@
+## 2.1.5
+
+* Add a default constructor Cancellable.cancelled that is already cancelled.
+
 ## 2.1.4
 
-* CancellableEvery and CancellableAny add new .async constructors."
+* CancellableEvery and CancellableAny add new .async constructors.
 
 ## 2.1.3
 
