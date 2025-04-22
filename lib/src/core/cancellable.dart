@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:cancellable/src/exception/cancelled_exception.dart';
 import 'package:weak_collections/weak_collections.dart';
@@ -23,7 +24,9 @@ abstract class Cancellable {
   ///基于当前 生产一个新的
   ///[father] 同时接受两个上级取消的控制 有任意其他取消的时候新的也执行取消
   ///[infectious] 传染 当新的able执行取消的时候将生产者同时取消
-  Cancellable makeCancellable({Cancellable? father, bool infectious = false});
+  ///[weakRef] 新建的able 当前对其管理的方式是否为 弱引用
+  Cancellable makeCancellable(
+      {Cancellable? father, bool infectious = false, bool weakRef = true});
 
   ///构建器
   factory Cancellable() => _Cancellable();
@@ -54,8 +57,13 @@ mixin CancellableMixin implements Cancellable {
   ///基于当前 生产一个新的
   ///[father] 同时接受两个上级取消的控制 有任意其他取消的时候新的也执行取消
   ///[infectious] 传染 当新的able执行取消的时候将生产者同时取消
-  Cancellable makeCancellable({Cancellable? father, bool infectious = false}) =>
-      _delegate.makeCancellable(father: father, infectious: infectious);
+  ///[weakRef] 新建的able 当前对其管理的方式是否为 弱引用
+  Cancellable makeCancellable(
+          {Cancellable? father,
+          bool infectious = false,
+          bool weakRef = true}) =>
+      _delegate.makeCancellable(
+          father: father, infectious: infectious, weakRef: weakRef);
 }
 
 // Expando<Completer<CancelledException>> _whenCancel = Expando();

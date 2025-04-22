@@ -1,3 +1,8 @@
+## 2.2.0
+
+* Cancellable.makeCancellable adds a new parameter weakRef, to determine whether the newly created
+  able will be managed as a weak reference.
+
 ## 2.1.5
 
 * Add a default constructor Cancellable.cancelled that is already cancelled.

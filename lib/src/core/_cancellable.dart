@@ -8,6 +8,8 @@ class _Cancellable implements Cancellable {
 
   Set<Cancellable>? _caches;
 
+  Set<Cancellable>? _cachesStrongRef;
+
   bool _isCancelled = false;
 
   ///当取消时的处理 同步处理
@@ -44,12 +46,20 @@ class _Cancellable implements Cancellable {
         .forEach((element) => element.cancel(reasonAsException));
     _caches?.clear();
     _caches = null;
+
+    _cachesStrongRef
+        ?.where((element) => element.isAvailable)
+        .forEach((element) => element.cancel(reasonAsException));
+    _cachesStrongRef?.clear();
+    _cachesStrongRef = null;
   }
 
   ///基于当前 生产一个新的
   ///[father] 同时接受两个上级取消的控制 有任意其他取消的时候新的也执行取消
   ///[infectious] 传染 当新的able执行取消的时候将生产者同时取消
-  Cancellable makeCancellable({Cancellable? father, bool infectious = false}) {
+  ///[weakRef] 新建的able 当前对其管理的方式是否为 弱引用
+  Cancellable makeCancellable(
+      {Cancellable? father, bool infectious = false, bool weakRef = true}) {
     _Cancellable c = _Cancellable();
 
     if (_isCancelled || (father != null && father.isUnavailable)) {
@@ -76,26 +86,38 @@ class _Cancellable implements Cancellable {
         this.onCancel.then(infectiousCancel);
       }
 
-      _addToCache(c);
-      c._bindParent(father);
+      _addToCache(c, weakRef);
+      c._bindParent(father, weakRef);
     }
     return c;
   }
 
-  void _addToCache(_Cancellable cancellable) {
-    _caches ??= WeakHashSet<Cancellable>();
-    _caches?.add(cancellable);
-
-    WeakReference<Set<Cancellable>> _weakCache = WeakReference(_caches!);
-    cancellable.onCancel.then((value) => _weakCache.target?.remove(this));
+  void _addToCache(_Cancellable cancellable, bool weakRef) {
+    if (weakRef) {
+      _caches ??= WeakHashSet<Cancellable>();
+      _caches?.add(cancellable);
+      WeakReference<Set<Cancellable>> _weakCache = WeakReference(_caches!);
+      cancellable.onCancel.then((value) => _weakCache.target?.remove(this));
+    } else {
+      _cachesStrongRef ??= HashSet<Cancellable>();
+      _cachesStrongRef?.add(cancellable);
+      cancellable.onCancel.then((value) {
+        if (isAvailable) {
+          _cachesStrongRef?.remove(this);
+        }
+      });
+    }
   }
 
-  void _bindParent(Cancellable? parent) {
+  void _bindParent(Cancellable? parent, bool weakRef) {
+    if (parent == null) return;
     if (parent is _Cancellable) {
-      parent._addToCache(this);
-    } else {
+      parent._addToCache(this, weakRef);
+    } else if (weakRef) {
       WeakReference<_Cancellable> weakThis = WeakReference(this);
-      parent?.onCancel.then((value) => weakThis.target?._cancel(value));
+      parent.onCancel.then((value) => weakThis.target?._cancel(value));
+    } else {
+      parent.onCancel.then(_cancel);
     }
   }
 }

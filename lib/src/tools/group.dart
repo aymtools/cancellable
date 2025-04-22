@@ -32,8 +32,12 @@ abstract class _CancellableGroup implements Cancellable {
   void cancel([reason]) => _manager.cancel(reason);
 
   @override
-  Cancellable makeCancellable({Cancellable? father, bool infectious = false}) =>
-      _manager.makeCancellable(father: father, infectious: infectious);
+  Cancellable makeCancellable(
+          {Cancellable? father,
+          bool infectious = false,
+          bool weakRef = true}) =>
+      _manager.makeCancellable(
+          father: father, infectious: infectious, weakRef: weakRef);
 
   @override
   CancelledException? get reasonAsException => _manager.reasonAsException;
