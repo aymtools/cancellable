@@ -1,3 +1,7 @@
+## 2.2.1
+
+* Fix the bug when weakRef=false
+
 ## 2.2.0
 
 * Cancellable.makeCancellable adds a new parameter weakRef, to determine whether the newly created

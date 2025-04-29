@@ -96,14 +96,17 @@ class _Cancellable implements Cancellable {
     if (weakRef) {
       _caches ??= WeakHashSet<Cancellable>();
       _caches?.add(cancellable);
+
       WeakReference<Set<Cancellable>> _weakCache = WeakReference(_caches!);
-      cancellable.onCancel.then((value) => _weakCache.target?.remove(this));
+      WeakReference<_Cancellable> weakChild = WeakReference(cancellable);
+      cancellable.onCancel
+          .then((value) => _weakCache.target?.remove(weakChild.target));
     } else {
       _cachesStrongRef ??= HashSet<Cancellable>();
       _cachesStrongRef?.add(cancellable);
       cancellable.onCancel.then((value) {
         if (isAvailable) {
-          _cachesStrongRef?.remove(this);
+          _cachesStrongRef?.remove(cancellable);
         }
       });
     }
