@@ -1,6 +1,6 @@
 name: cancellable
 description: This package provides a capability for cancellation.This feature allows termination or revocation of operations through a certain mechanism during task execution.
-version: 2.2.1
+version: 2.2.2
 homepage: https://github.com/aymtools/cancellable
 
 topics:

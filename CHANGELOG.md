@@ -1,3 +1,7 @@
+## 2.2.2
+
+* Fix the cancellation handling exception when weakRef=false.
+
 ## 2.2.1
 
 * Fix the bug when weakRef=false
