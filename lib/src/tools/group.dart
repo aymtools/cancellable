@@ -1,15 +1,19 @@
+import 'dart:collection';
+
 import 'package:cancellable/src/core/cancellable.dart';
 import 'package:cancellable/src/exception/cancelled_exception.dart';
 
 /// 一个可管理一组able的管理器
 abstract class _CancellableGroup implements Cancellable {
-  final Set<Cancellable> _cancellableList = {};
+  final Set<Cancellable> _cancellableList = HashSet();
 
   late final Cancellable _manager = () {
     return Cancellable()
       ..onCancel.then((reason) {
         if (_cancellableList.isNotEmpty) {
-          for (var c in [..._cancellableList]) c.cancel(reason);
+          for (var c in [..._cancellableList]) {
+            c.cancel(reason);
+          }
           _cancellableList.clear();
         }
       });

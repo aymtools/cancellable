@@ -1,3 +1,7 @@
+## 2.2.4
+
+* Optimize CancellableGroup by using HashSet to improve performance.
+
 ## 2.2.3
 
 * Fix the iteration exception during for loop when calling cancel on CancellableGroup.
