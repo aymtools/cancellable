@@ -1,3 +1,7 @@
+## 2.2.3
+
+* Fix the iteration exception during for loop when calling cancel on CancellableGroup.
+
 ## 2.2.2
 
 * Fix the cancellation handling exception when weakRef=false.

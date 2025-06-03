@@ -8,8 +8,10 @@ abstract class _CancellableGroup implements Cancellable {
   late final Cancellable _manager = () {
     return Cancellable()
       ..onCancel.then((reason) {
-        _cancellableList.forEach((c) => c.cancel(reason));
-        _cancellableList.clear();
+        if (_cancellableList.isNotEmpty) {
+          for (var c in [..._cancellableList]) c.cancel(reason);
+          _cancellableList.clear();
+        }
       });
   }();
 
