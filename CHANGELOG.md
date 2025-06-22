@@ -1,3 +1,7 @@
+## 2.3.0
+
+* Add CancellableComputer.
+
 ## 2.2.4
 
 * Optimize CancellableGroup by using HashSet to improve performance.
