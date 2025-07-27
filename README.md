@@ -92,6 +92,14 @@ main() async {
 
 ```
 
+## Disposable
+
+Disposable is just an alias for Cancellable.
+Additionally, DisposedException is an alias for CancelledException.
+onDispose = onCancel
+whenDispose = whenCancel
+Extensions related to Dispose have been added for Stream and Future.
+
 See [example](https://github.com/aymtools/cancellable/blob/master/example/example.dart)
 for detailed test case.
 

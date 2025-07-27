@@ -1,3 +1,7 @@
+## 2.4.0
+
+* Added Disposable and its related extensions.
+
 ## 2.3.0
 
 * Add CancellableComputer.
