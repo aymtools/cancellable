@@ -119,7 +119,7 @@ extension CancellableStreamController<T> on StreamController<T> {
   StreamController<T> bindCancellable(Cancellable cancellable,
       {bool closeWhenCancel = true}) {
     runNotInCancellableZone(() => cancellable.whenCancel.then(
-        (_) => closeWhenCancel ? this.close.call() : this.onCancel?.call()));
+        (_) => closeWhenCancel ? close.call() : onCancel?.call()));
     return this;
   }
 }

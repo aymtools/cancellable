@@ -17,4 +17,5 @@ dependencies:
   weak_collections: ^1.3.0
 
 dev_dependencies:
+  test: ^1.26.3
   lints: ^5.1.1

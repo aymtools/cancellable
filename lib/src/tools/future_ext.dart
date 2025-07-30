@@ -21,17 +21,17 @@ extension CancellableFutureExt<T> on Future<T> {
       });
     }
 
-    this.then((value) {
+    then((value) {
       if (cancellable.isAvailable && !completer.isCompleted) {
         completer.complete(value);
       }
     });
 
-    this.catchError((err, st) {
+    catchError((err, st) {
       if (cancellable.isAvailable && !completer.isCompleted) {
         completer.completeError(err, st);
       }
-      return Future<T>.error(err, st);
+      // return Future<T>.error(err, st);
     });
     return completer.future;
   }

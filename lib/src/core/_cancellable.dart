@@ -12,10 +12,15 @@ class _Cancellable implements Cancellable {
 
   bool _isCancelled = false;
 
+  SynchronousFuture<CancelledException>? _synchronousFuture;
+
   ///当取消时的处理 同步处理
-  Future<CancelledException> get onCancel => _completer.future;
+  @override
+  Future<CancelledException> get onCancel =>
+      _synchronousFuture ?? _completer.future;
 
   /// 当前是否是可用状态
+  @override
   bool get isAvailable => !_isCancelled;
 
   CancelledException? _reasonException;
@@ -29,9 +34,11 @@ class _Cancellable implements Cancellable {
   }
 
   ///执行通知取消时传递的消息包装的异常
+  @override
   CancelledException? get reasonAsException => _reasonException;
 
   ///通知执行取消
+  @override
   void cancel([dynamic reason]) => _cancel(reason);
 
   void _cancel(dynamic reason) {
@@ -40,6 +47,7 @@ class _Cancellable implements Cancellable {
     _reason = reason;
 
     _completer.complete(reasonAsException);
+    _synchronousFuture = SynchronousFuture(reasonAsException!);
     _completerAsync.complete(reasonAsException);
     _caches
         ?.where((element) => element.isAvailable)
@@ -58,6 +66,7 @@ class _Cancellable implements Cancellable {
   ///[father] 同时接受两个上级取消的控制 有任意其他取消的时候新的也执行取消
   ///[infectious] 传染 当新的able执行取消的时候将生产者同时取消
   ///[weakRef] 新建的able 当前对其管理的方式是否为 弱引用
+  @override
   Cancellable makeCancellable(
       {Cancellable? father, bool infectious = false, bool weakRef = true}) {
     _Cancellable c = _Cancellable();
@@ -76,14 +85,14 @@ class _Cancellable implements Cancellable {
           if (infectiousWatcher.isAvailable) {
             infectiousWatcher.cancel(reason);
             c.cancel(reason);
-            this.cancel(reason);
+            cancel(reason);
             father?.cancel(reason);
           }
         }
 
         c.onCancel.then(infectiousCancel);
         father?.onCancel.then(infectiousCancel);
-        this.onCancel.then(infectiousCancel);
+        onCancel.then(infectiousCancel);
       }
 
       _addToCache(c, weakRef);
@@ -97,10 +106,10 @@ class _Cancellable implements Cancellable {
       _caches ??= WeakHashSet<Cancellable>();
       _caches?.add(cancellable);
 
-      WeakReference<Set<Cancellable>> _weakCache = WeakReference(_caches!);
+      WeakReference<Set<Cancellable>> weakCache = WeakReference(_caches!);
       WeakReference<_Cancellable> weakChild = WeakReference(cancellable);
       cancellable.whenCancel
-          .then((value) => _weakCache.target?.remove(weakChild.target));
+          .then((value) => weakCache.target?.remove(weakChild.target));
     } else {
       _cachesStrongRef ??= HashSet<Cancellable>();
       _cachesStrongRef?.add(cancellable);

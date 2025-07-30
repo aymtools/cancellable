@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:cancellable/src/exception/cancelled_exception.dart';
+import 'package:cancellable/src/tools/synchronous_future.dart';
 import 'package:weak_collections/weak_collections.dart';
 
 part '_cancellable.dart';
@@ -40,24 +41,28 @@ abstract class Cancellable {
 }
 
 mixin CancellableMixin implements Cancellable {
-  Cancellable _delegate = _Cancellable();
+  final Cancellable _delegate = _Cancellable();
 
   ///当取消时的处理 同步处理
   Future<CancelledException> get onCancel => _delegate.onCancel;
 
   /// 当前是否是可用状态
+  @override
   bool get isAvailable => _delegate.isAvailable;
 
   ///执行通知取消时传递的消息包装的异常
+  @override
   CancelledException? get reasonAsException => _delegate.reasonAsException;
 
   ///通知执行取消
+  @override
   void cancel([dynamic reason]) => _delegate.cancel(reason);
 
   ///基于当前 生产一个新的
   ///[father] 同时接受两个上级取消的控制 有任意其他取消的时候新的也执行取消
   ///[infectious] 传染 当新的able执行取消的时候将生产者同时取消
   ///[weakRef] 新建的able 当前对其管理的方式是否为 弱引用
+  @override
   Cancellable makeCancellable(
           {Cancellable? father,
           bool infectious = false,
