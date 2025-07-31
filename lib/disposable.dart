@@ -53,18 +53,20 @@ extension StreamControllerDisposableExt<T> on StreamController<T> {
   /// 绑定到 Disposable dispose 时 closeWhenCancel=true close 否则取消
   /// [closeWhenDispose] == true closeStream  ==false cancelStream
   StreamController<T> bindDisposable(Disposable disposable,
-          {bool closeWhenDispose = true}) =>
-      bindCancellable(disposable, closeWhenCancel: closeWhenDispose);
+          {bool closeWhenDispose = true, bool sync = false}) =>
+      bindCancellable(disposable,
+          closeWhenCancel: closeWhenDispose, sync: sync);
 }
 
 extension StreamSinkDisposableExt<T> on StreamSink<T> {
   /// 绑定到 Disposable dispose 时close
-  StreamSink<T> bindDisposable(Disposable disposable) =>
-      bindCancellable(disposable);
+  StreamSink<T> bindDisposable(Disposable disposable, {bool sync = false}) =>
+      bindCancellable(disposable, sync: sync);
 }
 
 extension StreamSubscriptionDisposableExt<T> on StreamSubscription<T> {
   /// 绑定到 Disposable dispose 时 取消订阅
-  StreamSubscription<T> bindDisposable(Disposable disposable) =>
-      bindCancellable(disposable);
+  StreamSubscription<T> bindDisposable(Disposable disposable,
+          {bool sync = false}) =>
+      bindCancellable(disposable, sync: sync);
 }

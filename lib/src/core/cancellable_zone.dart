@@ -32,11 +32,15 @@ R _makeFuture<R>() => Future<Never>.error('') as R;
 //     .run(() => throw '');
 
 /// 利用cancellable绑定到zone 当cancel后zone所有的注册事件将不会调用 包含stream 的close 等相关的回调
+///
+/// [ignoreCancelledException] 是否自动忽略cancellable产生的异常
+///
+/// [forkZoneWithCancellable] 从当前zone fork时是否传递cancelable
 R? runCancellableZoned<R>(
-  R body(), {
+  R Function() body, {
   Map<Object?, Object?>? zoneValues,
   required Cancellable cancellable,
-  void onCancel(CancelledException reason)?,
+  void Function(CancelledException reason)? onCancel,
   bool ignoreCancelledException = true,
   bool forkZoneWithCancellable = true,
 }) {
@@ -211,10 +215,13 @@ void runWhenCancellableZone(void Function(Cancellable cancellable) action) {
 
 extension CancellableRunZone on Cancellable {
   /// 将使用当前Cancellable 执行runZone
+  ///
+  /// [ignoreCancelledException] 是否自动忽略cancellable产生的异常
+  /// [forkZoneWithCancellable] 从当前zone fork时是否传递cancelable
   R? withRunZone<R>(
-    R body(), {
+    R Function() body, {
     Map<Object?, Object?>? zoneValues,
-    void onCancel(CancelledException reason)?,
+    void Function(CancelledException reason)? onCancel,
     bool ignoreCancelledException = true,
     bool forkZoneWithCancellable = true,
   }) =>

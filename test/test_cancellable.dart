@@ -360,6 +360,21 @@ void main() {
       expect(cancellable.isAvailable, false);
       expect(testValue, 1);
     });
+
+    test('closeWhenCancel: true  sync: true', () async {
+      int testValue = 0;
+      final controller = StreamController(onCancel: () => testValue++);
+      Cancellable cancellable = Cancellable();
+      controller.bindCancellable(cancellable,
+          closeWhenCancel: true, sync: true);
+      expect(controller.isClosed, false);
+      expect(cancellable.isAvailable, true);
+      expect(testValue, 0);
+      cancellable.cancel();
+      expect(controller.isClosed, true);
+      expect(cancellable.isAvailable, false);
+      expect(testValue, 0);
+    });
   });
 }
 

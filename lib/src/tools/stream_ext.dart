@@ -36,7 +36,7 @@ extension CancellableStream<T> on Stream<T> {
             }
             return;
           }
-          sub = this.listen((event) {
+          sub = listen((event) {
             if (cancellable.isAvailable) controller.add(event);
           }, onError: (err, st) {
             if (cancellable.isAvailable) controller.addError(err, st);
@@ -64,22 +64,23 @@ extension CancellableStream<T> on Stream<T> {
       return controller.stream;
     }
 
-    return this.transform(StreamTransformer.fromBind(bind));
+    return transform(StreamTransformer.fromBind(bind));
   }
 
   /// 自动取消 StreamSubscription
   @Deprecated('use bindCancellable')
   StreamSubscription<T> listenC({
     required Cancellable cancellable,
-    required void onData(T event),
+    required void Function(T event) onData,
     Function? onError,
-    void onDone()?,
+    void Function()? onDone,
     bool? cancelOnError,
   }) {
-    var onDataX = (T event) {
+    onDataX(T event) {
       if (cancellable.isAvailable) onData.call(event);
-    };
-    var sub = this.listen(onDataX,
+    }
+
+    var sub = listen(onDataX,
         onError: onError, onDone: onDone, cancelOnError: cancelOnError);
     cancellable.whenCancel.then((value) => sub.cancel());
     return sub;
@@ -88,15 +89,16 @@ extension CancellableStream<T> on Stream<T> {
   /// 自动取消 StreamSubscription
   @Deprecated('use bindCancellable')
   StreamSubscription<T> listenCC(
-    void onData(T event), {
+    void Function(T event) onData, {
     required Cancellable cancellable,
     Function? onError,
-    void onDone()?,
+    void Function()? onDone,
     bool? cancelOnError,
   }) {
-    var onDataX = (T event) {
+    onDataX(T event) {
       if (cancellable.isAvailable) onData.call(event);
-    };
+    }
+
     var sub = this.listen(onDataX,
         onError: onError, onDone: onDone, cancelOnError: cancelOnError);
     cancellable.whenCancel.then((value) => sub.cancel());
@@ -117,9 +119,16 @@ extension CancellableStreamController<T> on StreamController<T> {
 
   /// 绑定到 Cancellable cancel时 closeWhenCancel=true close 否则取消
   StreamController<T> bindCancellable(Cancellable cancellable,
-      {bool closeWhenCancel = true}) {
-    runNotInCancellableZone(() => cancellable.whenCancel.then(
-        (_) => closeWhenCancel ? close.call() : onCancel?.call()));
+      {bool closeWhenCancel = true, bool sync = false}) {
+    runNotInCancellableZone(() {
+      if (sync) {
+        cancellable.onCancel
+            .then((_) => closeWhenCancel ? close.call() : onCancel?.call());
+      } else {
+        cancellable.whenCancel
+            .then((_) => closeWhenCancel ? close.call() : onCancel?.call());
+      }
+    });
     return this;
   }
 }
@@ -131,9 +140,14 @@ extension CancellableStreamSinkr<T> on StreamSink<T> {
       bindCancellable(cancellable);
 
   /// 绑定到 Cancellable cancel时close
-  StreamSink<T> bindCancellable(Cancellable cancellable) {
-    runNotInCancellableZone(
-        () => cancellable.whenCancel.then((_) => this.close.call()));
+  StreamSink<T> bindCancellable(Cancellable cancellable, {bool sync = false}) {
+    runNotInCancellableZone(() {
+      if (sync) {
+        cancellable.onCancel.then((_) => close.call());
+      } else {
+        cancellable.whenCancel.then((_) => close.call());
+      }
+    });
     return this;
   }
 }
@@ -145,9 +159,15 @@ extension CancellableStreamSubscription<T> on StreamSubscription<T> {
       bindCancellable(cancellable);
 
   /// 绑定到 Cancellable cancel时取消
-  StreamSubscription<T> bindCancellable(Cancellable cancellable) {
-    runNotInCancellableZone(
-        () => cancellable.onCancel.then((_) => this.cancel()));
+  StreamSubscription<T> bindCancellable(Cancellable cancellable,
+      {bool sync = true}) {
+    runNotInCancellableZone(() {
+      if (sync) {
+        cancellable.onCancel.then((_) => cancel());
+      } else {
+        cancellable.whenCancel.then((_) => cancel());
+      }
+    });
     return this;
   }
 }
