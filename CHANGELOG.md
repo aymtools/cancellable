@@ -1,11 +1,8 @@
-## 2.4.0
-
-* Added Disposable and its related extensions.
-* Fix onCancel not triggering immediately when cancelled.
-
 ## 2.3.0
 
 * Add CancellableComputer.
+* Added Disposable and its related extensions.
+* Fix onCancel not triggering immediately when cancelled.
 
 ## 2.2.4
 
