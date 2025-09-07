@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../exception/cancelled_exception.dart';
 import 'cancellable.dart';
 
@@ -126,6 +128,18 @@ R? runCancellableZoned<R>(
     return parent.fork(zone.parent!, specification, zoneValues);
   }
 
+  Zone fork2(Zone self, ZoneDelegate parent, Zone zone,
+      ZoneSpecification? specification, Map<Object?, Object?>? zoneValue) {
+    final zValues = {};
+    if (zoneValues != null) {
+      zValues.addAll(zoneValues);
+    }
+    final c = self[_cancellableKey];
+    final childCancellable = c?.makeCancellable();
+    zValues[_cancellableKey] = childCancellable;
+    return parent.fork(zone, specification, zValues);
+  }
+
   final zValues = {};
   if (zoneValues != null) {
     zValues.addAll(zoneValues);
@@ -142,7 +156,7 @@ R? runCancellableZoned<R>(
       registerUnaryCallback: registerUnaryCallback,
       registerBinaryCallback: registerBinaryCallback,
       handleUncaughtError: handleUncaughtError,
-      fork: forkZoneWithCancellable ? null : fork,
+      fork: forkZoneWithCancellable ? fork2 : fork,
     ),
   );
   // return runZonedGuarded(() {
@@ -178,7 +192,7 @@ extension CancellableZoneCheck on Zone {
   /// 检查当前zone是否为 CancellableZone
   bool get isCancellableZone => this[_cancellableKey] != null;
 
-  /// 检查当前CancellableZone 是否是 isAvailable状态  如果不是CancellableZone则返回false
+  /// 检查当前CancellableZone 是否是 isAvailable状态  如果不是CancellableZone则返回 true
   bool get isCancellableActive {
     if (isCancellableZone) {
       return _requiredCancellable.isAvailable;
@@ -194,9 +208,12 @@ extension CancellableZoneCheck on Zone {
   }
 
   Cancellable get _requiredCancellable => this[_cancellableKey]!;
+
+  @visibleForTesting
+  Cancellable? get cancellable => this[_cancellableKey];
 }
 
-/// 必须不能运行在CancellableZone 如果是则寻找其parent
+/// 必须不能运行在CancellableZone 如果是 则寻找其parent
 R runNotInCancellableZone<R>(R Function() action) {
   var zone = Zone.current;
   while (zone.isCancellableZone) {
