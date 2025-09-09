@@ -102,6 +102,24 @@ void main() {
       expect(zone3CancellableChild?.isAvailable, isFalse);
     });
 
+    test('zone stream create', () async {
+      Cancellable cancellable = Cancellable();
+      late Stream<int> stream;
+      int testValue = 0;
+      cancellable.withRunZone(() {
+        stream = _createStream();
+      });
+      stream.listen((event) => testValue = event);
+
+      expect(testValue, 0);
+      await Future.delayed(Duration(milliseconds: 50));
+      cancellable.cancel();
+      expect(testValue, 0);
+      await Future.delayed(Duration(milliseconds: 100));
+      expect(testValue, 1);
+      await Future.delayed(Duration(milliseconds: 1000));
+    });
+
     test('zone stream cancel', () async {
       Cancellable cancellable = Cancellable();
       Stream<int> stream = _createStream();
@@ -116,6 +134,7 @@ void main() {
       expect(testValue, 0);
       await Future.delayed(Duration(milliseconds: 100));
       expect(testValue, 0);
+      await Future.delayed(Duration(milliseconds: 1000));
     });
 
     test('zone cancel', () async {
@@ -133,6 +152,8 @@ void main() {
       expect(testValue, 0);
       await Future.delayed(Duration(milliseconds: 100));
       expect(testValue, 0);
+
+      await Future.delayed(Duration(milliseconds: 1000));
     });
 
     test('zone cancel 2', () async {
@@ -160,20 +181,27 @@ void main() {
       expect(testValue, 3);
       await Future.delayed(Duration(milliseconds: 100));
       expect(testValue, 3);
+
+      await Future.delayed(Duration(milliseconds: 1000));
     });
   });
 }
 
 Stream<int> _createStream() async* {
-  print('object ${Zone.current.isCancellableZone}');
+  print('_createStream ${Zone.current.isCancellableZone}');
   await Future.delayed(Duration(milliseconds: 100));
+  print('stream 1');
   yield 1;
   await Future.delayed(Duration(milliseconds: 100));
+  print('stream 2');
   yield 2;
   await Future.delayed(Duration(milliseconds: 100));
+  print('stream 3');
   yield 3;
   await Future.delayed(Duration(milliseconds: 100));
+  print('stream 4');
   yield 4;
   await Future.delayed(Duration(milliseconds: 100));
+  print('stream 5');
   yield 5;
 }

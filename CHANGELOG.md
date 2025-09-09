@@ -1,3 +1,7 @@
+## 2.3.1
+
+* Use makeCancellable when forking a cancellableZone.
+
 ## 2.3.0
 
 * Add CancellableComputer.
