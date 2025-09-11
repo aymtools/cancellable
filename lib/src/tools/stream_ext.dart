@@ -8,9 +8,11 @@ extension CancellableStream<T> on Stream<T> {
   Stream<T> bindCancellable(Cancellable cancellable,
       {bool closeWhenCancel = true}) {
     var result = this;
-    runWhenCancellableZone((cancellableZone) => result =
-        runNotInCancellableZone(() => result._bindCancellable(cancellableZone,
-            closeWhenCancel: closeWhenCancel)));
+    runWhenCancellableZone((cancellableZone) =>
+    result =
+        runNotInCancellableZone(() =>
+            result._bindCancellable(cancellableZone,
+                closeWhenCancel: closeWhenCancel)));
 
     return runNotInCancellableZone(() {
       return result._bindCancellable(cancellable,
@@ -88,8 +90,7 @@ extension CancellableStream<T> on Stream<T> {
 
   /// 自动取消 StreamSubscription
   @Deprecated('use bindCancellable')
-  StreamSubscription<T> listenCC(
-    void Function(T event) onData, {
+  StreamSubscription<T> listenCC(void Function(T event) onData, {
     required Cancellable cancellable,
     Function? onError,
     void Function()? onDone,
@@ -99,7 +100,7 @@ extension CancellableStream<T> on Stream<T> {
       if (cancellable.isAvailable) onData.call(event);
     }
 
-    var sub = this.listen(onDataX,
+    var sub = listen(onDataX,
         onError: onError, onDone: onDone, cancelOnError: cancelOnError);
     cancellable.whenCancel.then((value) => sub.cancel());
     return sub;

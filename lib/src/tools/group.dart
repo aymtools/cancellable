@@ -20,16 +20,18 @@ abstract class _CancellableGroup implements Cancellable {
   }();
 
   late final Cancellable _managerAs =
-      _manager.makeCancellable(infectious: true);
+  _manager.makeCancellable(infectious: true);
 
   void add(Cancellable cancellable);
 
   Future<dynamic> get whenCancel => _manager.whenCancel;
 
+  @override
   bool get isAvailable => _manager.isAvailable;
 
   bool get isUnavailable => _manager.isUnavailable;
 
+  @override
   Future<CancelledException> get onCancel => _manager.onCancel;
 
   Cancellable asCancellable() => _managerAs;
@@ -38,10 +40,9 @@ abstract class _CancellableGroup implements Cancellable {
   void cancel([reason]) => _manager.cancel(reason);
 
   @override
-  Cancellable makeCancellable(
-          {Cancellable? father,
-          bool infectious = false,
-          bool weakRef = true}) =>
+  Cancellable makeCancellable({Cancellable? father,
+    bool infectious = false,
+    bool weakRef = true}) =>
       _manager.makeCancellable(
           father: father, infectious: infectious, weakRef: weakRef);
 
@@ -88,7 +89,7 @@ class CancellableEvery extends _CancellableGroup {
     });
   }
 
-  _check() {
+  void _check() {
     _cancellableList.removeWhere((e) => e.isUnavailable);
     if (_cancellableList.isEmpty) {
       _manager.cancel();

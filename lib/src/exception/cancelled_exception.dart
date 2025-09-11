@@ -5,8 +5,9 @@ class CancelledException implements Exception {
 
   CancelledException([this.reason]);
 
+  @override
   String toString() {
-    Object? message = this.reason;
+    Object? message = reason;
     if (message == null) return "CancelledException";
     return "CancelledException: $message";
   }
