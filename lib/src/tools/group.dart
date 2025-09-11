@@ -20,7 +20,7 @@ abstract class _CancellableGroup implements Cancellable {
   }();
 
   late final Cancellable _managerAs =
-  _manager.makeCancellable(infectious: true);
+      _manager.makeCancellable(infectious: true);
 
   void add(Cancellable cancellable);
 
@@ -40,9 +40,10 @@ abstract class _CancellableGroup implements Cancellable {
   void cancel([reason]) => _manager.cancel(reason);
 
   @override
-  Cancellable makeCancellable({Cancellable? father,
-    bool infectious = false,
-    bool weakRef = true}) =>
+  Cancellable makeCancellable(
+          {Cancellable? father,
+          bool infectious = false,
+          bool weakRef = true}) =>
       _manager.makeCancellable(
           father: father, infectious: infectious, weakRef: weakRef);
 

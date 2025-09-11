@@ -64,9 +64,10 @@ mixin CancellableMixin implements Cancellable {
   ///[infectious] 传染 当新的able执行取消的时候将生产者同时取消
   ///[weakRef] 新建的able 当前对其管理的方式是否为 弱引用
   @override
-  Cancellable makeCancellable({Cancellable? father,
-    bool infectious = false,
-    bool weakRef = true}) =>
+  Cancellable makeCancellable(
+          {Cancellable? father,
+          bool infectious = false,
+          bool weakRef = true}) =>
       _delegate.makeCancellable(
           father: father, infectious: infectious, weakRef: weakRef);
 }
