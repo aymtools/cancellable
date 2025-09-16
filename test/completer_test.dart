@@ -1,12 +1,11 @@
 import 'package:cancellable/cancellable.dart';
-import 'package:cancellable/src/tools/computer.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('async', () {
     test('not cancel', () async {
       Cancellable cancellable = Cancellable();
-      CancellableComputer<int> computer = CancellableComputer(cancellable);
+      CancellableCompleter<int> computer = CancellableCompleter(cancellable);
 
       int testValue = 0;
       computer.future.then((v) => testValue = v);
@@ -22,7 +21,7 @@ void main() {
 
     test('cancel', () async {
       Cancellable cancellable = Cancellable();
-      CancellableComputer<int> computer = CancellableComputer(cancellable);
+      CancellableCompleter<int> computer = CancellableCompleter(cancellable);
       int testValue = 0;
       Object? error;
       Future<void> testAsync() async {
@@ -47,8 +46,8 @@ void main() {
 
     test('cancel throwWhenCancel: false', () async {
       Cancellable cancellable = Cancellable();
-      CancellableComputer<int> computer =
-          CancellableComputer(cancellable, throwWhenCancel: false);
+      CancellableCompleter<int> computer =
+          CancellableCompleter(cancellable, throwWhenCancel: false);
       int testValue = 0;
       computer.future.then((v) => testValue = v);
       expect(testValue, 0);
@@ -60,8 +59,8 @@ void main() {
       Cancellable cancellable = Cancellable();
       int testValue = 0;
       Object? error;
-      CancellableComputer<int> computer =
-          CancellableComputer(cancellable, whenCancel: () => 2);
+      CancellableCompleter<int> computer =
+          CancellableCompleter(cancellable, whenCancel: () => 2);
 
       Future<void> testAsync() async {
         try {
@@ -86,7 +85,7 @@ void main() {
   group('sync', () {
     test('not cancel', () {
       Cancellable cancellable = Cancellable();
-      CancellableComputer computer = CancellableComputer.sync(cancellable);
+      CancellableCompleter computer = CancellableCompleter.sync(cancellable);
       int testValue = 0;
       computer.future.then((_) => testValue++);
       expect(testValue, 0);
@@ -97,7 +96,8 @@ void main() {
 
     test('cancel', () {
       Cancellable cancellable = Cancellable();
-      CancellableComputer<int> computer = CancellableComputer.sync(cancellable);
+      CancellableCompleter<int> computer =
+          CancellableCompleter.sync(cancellable);
       int testValue = 0;
       Object? error;
       Future<void> testAsync() async {
@@ -120,8 +120,8 @@ void main() {
 
     test('cancel throwOnCancel: false', () {
       Cancellable cancellable = Cancellable();
-      CancellableComputer<int> computer =
-          CancellableComputer.sync(cancellable, throwOnCancel: false);
+      CancellableCompleter<int> computer =
+          CancellableCompleter.sync(cancellable, throwOnCancel: false);
       int testValue = 0;
       Object? error;
       Future<void> testAsync() async {
@@ -145,8 +145,8 @@ void main() {
       Cancellable cancellable = Cancellable();
       int testValue = 0;
       Object? error;
-      CancellableComputer<int> computer =
-          CancellableComputer.sync(cancellable, onCancel: () => 2);
+      CancellableCompleter<int> computer =
+          CancellableCompleter.sync(cancellable, onCancel: () => 2);
       Future<void> testAsync() async {
         try {
           testValue = await computer.future;

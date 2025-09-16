@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:cancellable/src/core/cancellable.dart';
 
 @pragma("vm:isolate-unsendable")
-class CancellableComputer<T> implements Completer<T> {
+class CancellableCompleter<T> implements Completer<T> {
   final Completer<T> _completer;
   final Cancellable _cancellable;
 
-  CancellableComputer(this._cancellable,
+  CancellableCompleter(this._cancellable,
       {T Function()? whenCancel, bool throwWhenCancel = true})
       : _completer = Completer<T>() {
     if (whenCancel != null) {
@@ -25,7 +25,7 @@ class CancellableComputer<T> implements Completer<T> {
     }
   }
 
-  CancellableComputer.sync(this._cancellable,
+  CancellableCompleter.sync(this._cancellable,
       {T Function()? onCancel, bool throwOnCancel = true})
       : _completer = Completer<T>.sync() {
     if (onCancel != null) {

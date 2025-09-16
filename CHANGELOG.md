@@ -1,10 +1,14 @@
+## 2.3.2
+
+* export CancellableCompleter
+
 ## 2.3.1
 
 * Use makeCancellable when forking a cancellableZone.
 
 ## 2.3.0
 
-* Add CancellableComputer.
+* Add CancellableCompleter.
 * Added Disposable and its related extensions.
 * Fix onCancel not triggering immediately when cancelled.
 

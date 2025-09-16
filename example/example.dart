@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:cancellable/cancellable.dart';
 import 'package:cancellable/src/tools/current.dart';
 
-main() async {
+Future<void> main() async {
   Cancellable cancellable = Cancellable();
 
   //可用性判断
