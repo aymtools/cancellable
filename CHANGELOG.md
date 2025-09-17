@@ -1,6 +1,6 @@
-## 2.3.2
+## 2.4.0
 
-* export CancellableCompleter
+* Added CancellableCompleter
 
 ## 2.3.1
 
@@ -8,7 +8,6 @@
 
 ## 2.3.0
 
-* Add CancellableCompleter.
 * Added Disposable and its related extensions.
 * Fix onCancel not triggering immediately when cancelled.
 
