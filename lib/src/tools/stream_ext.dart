@@ -23,10 +23,13 @@ extension CancellableStream<T> on Stream<T> {
     Stream<T> bind(Stream<T> stream) {
       late StreamController<T> controller;
       if (cancellable.isUnavailable) {
+        controller = isBroadcast
+            ? StreamController<T>.broadcast(sync: true)
+            : StreamController<T>(sync: true);
         if (closeWhenCancel) {
-          return Stream<T>.empty();
+          controller.close();
         }
-        return StreamController<T>().stream;
+        return controller.stream;
       } else {
         StreamSubscription<T>? sub;
         void onListen() {
@@ -36,20 +39,25 @@ extension CancellableStream<T> on Stream<T> {
             }
             return;
           }
-          sub = listen((event) {
-            if (cancellable.isAvailable) controller.add(event);
-          }, onError: (err, st) {
-            if (cancellable.isAvailable) controller.addError(err, st);
-          }, onDone: () {
-            if (cancellable.isAvailable) controller.close();
-          });
+          try {
+            sub ??= listen((event) {
+              if (cancellable.isAvailable) controller.add(event);
+            }, onError: (err, st) {
+              if (cancellable.isAvailable) controller.addError(err, st);
+            }, onDone: () {
+              if (cancellable.isAvailable) controller.close();
+            });
+          } catch (err, st) {
+            /// 暂时没有解决这个问题 将listen的异常 转化为stream的异常了
+            if (closeWhenCancel && !controller.isClosed) {
+              controller.addError(err, st);
+            }
+          }
         }
 
         void onCancel() {
           sub?.cancel();
-          if (closeWhenCancel && !controller.isClosed) {
-            controller.close();
-          }
+          sub = null;
         }
 
         if (isBroadcast) {
@@ -59,7 +67,15 @@ extension CancellableStream<T> on Stream<T> {
           controller = StreamController<T>(
               onListen: onListen, onCancel: onCancel, sync: true);
         }
-        cancellable.whenCancel.then((_) => controller.onCancel?.call());
+
+        void whenCancel() {
+          onCancel();
+          if (closeWhenCancel && !controller.isClosed) {
+            controller.close();
+          }
+        }
+
+        cancellable.whenCancel.then((_) => whenCancel());
       }
       return controller.stream;
     }

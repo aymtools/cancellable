@@ -1,3 +1,7 @@
+## 2.5.0
+
+* Stream.bindCancellable optimize the code logic.
+
 ## 2.4.0
 
 * Added CancellableCompleter
