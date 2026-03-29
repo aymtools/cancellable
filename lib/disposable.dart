@@ -45,8 +45,10 @@ extension StreamDisposableExt<T> on Stream<T> {
   /// 将stream关联到 Disposable dispose后自动解绑
   /// [closeWhenDispose] == true closeStream  ==false cancelStream
   Stream<T> bindDisposable(Disposable disposable,
-          {bool closeWhenDispose = true}) =>
-      bindCancellable(disposable, closeWhenCancel: closeWhenDispose);
+          {bool closeWhenDispose = true, bool? reportCancelledException}) =>
+      bindCancellable(disposable,
+          closeWhenCancel: closeWhenDispose,
+          reportCancelledException: reportCancelledException);
 }
 
 extension StreamControllerDisposableExt<T> on StreamController<T> {

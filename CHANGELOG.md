@@ -1,3 +1,8 @@
+## 2.6.0
+
+* Stream.bindCancellable: Added reportCancelledException parameter to emit CancelledException as an
+  error in the stream.
+
 ## 2.5.0
 
 * Stream.bindCancellable optimize the code logic.

@@ -362,10 +362,7 @@ void main() {
       );
 
       expect(events, []);
-      expect(isDone, false, reason: 'async');
-      await Future.delayed(Duration.zero);
-      expect(events, []);
-      expect(isDone, isTrue);
+      expect(isDone, isTrue, reason: 'sync');
       sub.cancel();
 
       controller.add('test');
