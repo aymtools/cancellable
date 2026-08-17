@@ -37,18 +37,22 @@ extension DisposableFutureExt<T> on Future<T> {
   /// 将future 关联到 Disposable 当 dispose 后 不执行then 和 err
   /// [throwWhenDispose] == true 抛出 CancelledException ==false 时不执行任何操作
   Future<T> bindDisposable(Disposable disposable,
-          {bool throwWhenDispose = false}) =>
-      bindCancellable(disposable, throwWhenCancel: throwWhenDispose);
+          {bool throwWhenDispose = false, T Function()? onDispose}) =>
+      bindCancellable(disposable,
+          throwWhenCancel: throwWhenDispose, onCancel: onDispose);
 }
 
 extension StreamDisposableExt<T> on Stream<T> {
   /// 将stream关联到 Disposable dispose后自动解绑
   /// [closeWhenDispose] == true closeStream  ==false cancelStream
   Stream<T> bindDisposable(Disposable disposable,
-          {bool closeWhenDispose = true, bool? emitCancelledException}) =>
+          {bool closeWhenDispose = true,
+          bool? emitCancelledException,
+          void Function(StreamSink<T> sink)? onDispose}) =>
       bindCancellable(disposable,
           closeWhenCancel: closeWhenDispose,
-          emitCancelledException: emitCancelledException);
+          emitCancelledException: emitCancelledException,
+          onCancel: onDispose);
 }
 
 extension StreamControllerDisposableExt<T> on StreamController<T> {
@@ -57,19 +61,25 @@ extension StreamControllerDisposableExt<T> on StreamController<T> {
   StreamController<T> bindDisposable(Disposable disposable,
           {bool closeWhenDispose = true,
           bool sync = false,
-          bool? emitCancelledException}) =>
+          bool? emitCancelledException,
+          void Function(StreamSink<T> sink)? onDispose}) =>
       bindCancellable(disposable,
           closeWhenCancel: closeWhenDispose,
           sync: sync,
-          emitCancelledException: emitCancelledException);
+          emitCancelledException: emitCancelledException,
+          onCancel: onDispose);
 }
 
 extension StreamSinkDisposableExt<T> on StreamSink<T> {
   /// 绑定到 Disposable dispose 时close
   StreamSink<T> bindDisposable(Disposable disposable,
-          {bool sync = false, bool? emitCancelledException}) =>
+          {bool sync = false,
+          bool? emitCancelledException,
+          void Function(StreamSink<T> sink)? onDispose}) =>
       bindCancellable(disposable,
-          sync: sync, emitCancelledException: emitCancelledException);
+          sync: sync,
+          emitCancelledException: emitCancelledException,
+          onCancel: onDispose);
 }
 
 extension StreamSubscriptionDisposableExt<T> on StreamSubscription<T> {

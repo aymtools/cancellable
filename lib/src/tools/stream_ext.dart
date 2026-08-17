@@ -213,14 +213,14 @@ extension CancellableStreamSinkr<T> on StreamSink<T> {
   StreamSink<T> bindCancellable(Cancellable cancellable,
       {bool sync = false,
       bool? emitCancelledException,
-      void Function(StreamSink<T> sink)? onCancell}) {
+      void Function(StreamSink<T> sink)? onCancel}) {
     runNotInCancellableZone(() {
       if (sync) {
         cancellable.onCancel.then((ex) {
           if (emitCancelledException == true) {
             addError(ex, StackTrace.empty);
-          } else if (onCancell != null) {
-            _safeRunOnCancel(onCancell, this, () => false);
+          } else if (onCancel != null) {
+            _safeRunOnCancel(onCancel, this, () => false);
           }
           close.call();
         });
@@ -228,8 +228,8 @@ extension CancellableStreamSinkr<T> on StreamSink<T> {
         cancellable.whenCancel.then((ex) {
           if (emitCancelledException == true) {
             addError(ex, StackTrace.empty);
-          } else if (onCancell != null) {
-            _safeRunOnCancel(onCancell, this, () => false);
+          } else if (onCancel != null) {
+            _safeRunOnCancel(onCancel, this, () => false);
           }
           return close.call();
         });
