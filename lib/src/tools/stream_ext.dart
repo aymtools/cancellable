@@ -6,23 +6,30 @@ import 'package:cancellable/src/core/cancellable_zone.dart';
 extension CancellableStream<T> on Stream<T> {
   /// 将stream关联到 Cancellable cancel后自动解绑
   /// * [emitCancelledException]  是否将CancelledException加入到Stream
+  /// * [onCancel] 自定义取消l时的处理 优先级低于[emitCancelledException]
   Stream<T> bindCancellable(Cancellable cancellable,
-      {bool closeWhenCancel = true, bool? emitCancelledException}) {
+      {bool closeWhenCancel = true,
+      bool? emitCancelledException,
+      void Function(StreamSink<T> sink)? onCancel}) {
     var result = this;
     runWhenCancellableZone((cancellableZone) => result =
         runNotInCancellableZone(() => result._bindCancellable(cancellableZone,
             closeWhenCancel: closeWhenCancel,
-            emitCancelledException: emitCancelledException)));
+            emitCancelledException: emitCancelledException,
+            onCancelCallback: null)));
 
     return runNotInCancellableZone(() {
       return result._bindCancellable(cancellable,
           closeWhenCancel: closeWhenCancel,
-          emitCancelledException: emitCancelledException);
+          emitCancelledException: emitCancelledException,
+          onCancelCallback: onCancel);
     });
   }
 
   Stream<T> _bindCancellable(Cancellable cancellable,
-      {required bool closeWhenCancel, required bool? emitCancelledException}) {
+      {required bool closeWhenCancel,
+      required bool? emitCancelledException,
+      required void Function(StreamSink<T> sink)? onCancelCallback}) {
     Stream<T> bind(Stream<T> stream) {
       late StreamController<T> controller;
 
@@ -33,8 +40,11 @@ extension CancellableStream<T> on Stream<T> {
             if (emitCancelledException == true) {
               controller.addError(
                   cancellable.reasonAsException!, StackTrace.empty);
+            } else if (onCancelCallback != null) {
+              _safeRunOnCancel(
+                  onCancelCallback, controller.sink, () => controller.isClosed);
             }
-            if (closeWhenCancel) {
+            if (closeWhenCancel && !controller.isClosed) {
               controller.close();
             }
           }
@@ -56,27 +66,30 @@ extension CancellableStream<T> on Stream<T> {
         }
       }
 
-      void onCancel() {
+      void onCancelSub() {
         sub?.cancel();
         sub = null;
       }
 
       if (isBroadcast) {
         controller = StreamController<T>.broadcast(
-            onListen: onListen, onCancel: onCancel, sync: true);
+            onListen: onListen, onCancel: onCancelSub, sync: true);
       } else {
         controller = StreamController<T>(
-            onListen: onListen, onCancel: onCancel, sync: true);
+            onListen: onListen, onCancel: onCancelSub, sync: true);
       }
 
       if (cancellable.isAvailable) {
         void whenCancel(exception) {
-          onCancel();
+          onCancelSub();
           if (!controller.isClosed) {
             if (emitCancelledException == true) {
               controller.addError(exception, StackTrace.empty);
+            } else if (onCancelCallback != null) {
+              _safeRunOnCancel(
+                  onCancelCallback, controller.sink, () => controller.isClosed);
             }
-            if (closeWhenCancel) {
+            if (closeWhenCancel && !controller.isClosed) {
               controller.close();
             }
           }
@@ -144,17 +157,26 @@ extension CancellableStreamController<T> on StreamController<T> {
   StreamController<T> bindCancellable(Cancellable cancellable,
       {bool closeWhenCancel = true,
       bool sync = false,
-      bool? emitCancelledException}) {
+      bool? emitCancelledException,
+      void Function(StreamSink<T> sink)? onCancel}) {
+    final onCancelController = this.onCancel;
     runNotInCancellableZone(() {
       if (sync) {
         cancellable.onCancel.then((ex) {
           if (closeWhenCancel) {
             if (emitCancelledException == true) {
               addError(ex, StackTrace.empty);
+            } else if (onCancel != null) {
+              _safeRunOnCancel(onCancel, sink, () => isClosed);
             }
-            close.call();
+            if (!isClosed) {
+              close.call();
+            }
           } else {
-            onCancel?.call();
+            if (onCancel != null) {
+              _safeRunOnCancel(onCancel, sink, () => isClosed);
+            }
+            onCancelController?.call();
           }
         });
       } else {
@@ -162,10 +184,17 @@ extension CancellableStreamController<T> on StreamController<T> {
           if (closeWhenCancel) {
             if (emitCancelledException == true) {
               addError(ex, StackTrace.empty);
+            } else if (onCancel != null) {
+              _safeRunOnCancel(onCancel, sink, () => isClosed);
             }
-            close.call();
+            if (!isClosed) {
+              close.call();
+            }
           } else {
-            onCancel?.call();
+            if (onCancel != null) {
+              _safeRunOnCancel(onCancel, sink, () => isClosed);
+            }
+            onCancelController?.call();
           }
         });
       }
@@ -182,12 +211,16 @@ extension CancellableStreamSinkr<T> on StreamSink<T> {
 
   /// 绑定到 Cancellable cancel时close
   StreamSink<T> bindCancellable(Cancellable cancellable,
-      {bool sync = false, bool? emitCancelledException}) {
+      {bool sync = false,
+      bool? emitCancelledException,
+      void Function(StreamSink<T> sink)? onCancell}) {
     runNotInCancellableZone(() {
       if (sync) {
         cancellable.onCancel.then((ex) {
           if (emitCancelledException == true) {
             addError(ex, StackTrace.empty);
+          } else if (onCancell != null) {
+            _safeRunOnCancel(onCancell, this, () => false);
           }
           close.call();
         });
@@ -195,6 +228,8 @@ extension CancellableStreamSinkr<T> on StreamSink<T> {
         cancellable.whenCancel.then((ex) {
           if (emitCancelledException == true) {
             addError(ex, StackTrace.empty);
+          } else if (onCancell != null) {
+            _safeRunOnCancel(onCancell, this, () => false);
           }
           return close.call();
         });
@@ -221,5 +256,18 @@ extension CancellableStreamSubscription<T> on StreamSubscription<T> {
       }
     });
     return this;
+  }
+}
+
+void _safeRunOnCancel<T>(void Function(StreamSink<T> sink) onCancel,
+    StreamSink<T> sink, bool Function() isClosed) {
+  try {
+    onCancel(sink);
+  } catch (error, stackTrace) {
+    if (!isClosed()) {
+      sink.addError(error, stackTrace);
+    } else {
+      rethrow;
+    }
   }
 }

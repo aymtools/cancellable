@@ -1,3 +1,7 @@
+## 2.7.0
+
+* Add `onCancel` to `Stream/Future`'s bindCancellable to allow custom cancel handlers.
+
 ## 2.6.0
 
 * Stream.bindCancellable: Added emitCancelledException parameter to emit CancelledException as an

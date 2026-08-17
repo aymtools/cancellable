@@ -5,9 +5,14 @@ import 'package:cancellable/src/tools/never_exec_future.dart';
 
 extension CancellableFutureExt<T> on Future<T> {
   /// 将future 关联到 Cancellable 当cancel后 不执行then 和 err
+  /// * [throwWhenCancel] 将CancelledException以Future的异常发出
+  /// * [onCancel] 自定义取消l时的处理 返回T或者抛异常 优先级低于[throwWhenCancel]
   Future<T> bindCancellable(Cancellable cancellable,
-      {bool throwWhenCancel = false}) {
+      {bool throwWhenCancel = false, T Function()? onCancel}) {
     if (cancellable.isUnavailable && !throwWhenCancel) {
+      if (onCancel != null) {
+        return Future.sync(onCancel);
+      }
       return NeverExecFuture<T>();
     }
 
@@ -19,6 +24,18 @@ extension CancellableFutureExt<T> on Future<T> {
           completer.completeError(value, StackTrace.empty);
         }
       });
+    } else if (onCancel != null) {
+      if (!completer.isCompleted) {
+        try {
+          completer.complete(onCancel());
+        } catch (error, stackTrace) {
+          if (!completer.isCompleted) {
+            completer.completeError(error, stackTrace);
+          } else {
+            rethrow;
+          }
+        }
+      }
     }
 
     then((value) {
