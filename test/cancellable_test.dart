@@ -240,8 +240,8 @@ void main() {
 
       void testFunc() async {
         try {
-          await delayFuture()
-              .bindCancellable(cancellable, throwWhenCancel: true);
+          await (delayFuture()
+              .bindCancellable(cancellable, throwWhenCancel: true));
           testValue++;
         } catch (e) {
           error = e;

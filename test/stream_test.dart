@@ -531,8 +531,9 @@ void main() {
     expect(events5, []);
 
     expect(listenCallCount, 3);
-    // cancellable.cancel 取消时需要等一个事件循环 但是不在触发 events 所以这里先不增加cancelCallCount
-    expect(cancelCallCount, 2);
+    // -- cancellable.cancel 取消时需要等一个事件循环 但是不在触发 events 所以这里先不增加cancelCallCount
+    // 取消调整为同步调用
+    expect(cancelCallCount, 3);
 
     await Future.delayed(Duration.zero);
     controller.add(7);
@@ -626,8 +627,9 @@ void main() {
 
     cancellable.cancel();
     expect(listenCallCount, 1);
-    // cancellable.cancel 取消时需要等一个事件循环 所以callCount不会立即增加
-    expect(cancelCallCount, 0);
+    // -- cancellable.cancel 取消时需要等一个事件循环 所以callCount不会立即增加
+    // 取消调整为同步调用
+    expect(cancelCallCount, 1);
     expect(events1, [1]);
 
     controller.add(2);
@@ -647,4 +649,127 @@ void main() {
     // 取消订阅不触发cancel 因为cancellable已经取消
     expect(cancelCallCount, 1);
   });
+
+  ////
+  group('Stream.bindCancellable onCancel', () {
+    test('onCancel callback should be called when cancelled', () async {
+      final controller = StreamController<int>(sync: true);
+      final cancellable = Cancellable();
+      bool onCancelCalled = false;
+
+      final stream = controller.stream.bindCancellable(
+        cancellable,
+        onCancel: (exception, sink) {
+          onCancelCalled = true;
+          expect(exception.reason, 'test-reason');
+        },
+      );
+
+      stream.listen((_) {});
+      cancellable.cancel('test-reason');
+
+      // 等待微任务执行 (onCancel 通过 then() 触发)
+      await Future.delayed(Duration.zero);
+      expect(onCancelCalled, isTrue);
+    });
+
+    test('onCancel callback can add value to sink', () async {
+      final controller = StreamController<int>(sync: true);
+      final cancellable = Cancellable();
+      final events = <int>[];
+
+      final stream = controller.stream.bindCancellable(
+        cancellable,
+        onCancel: (exception, sink) {
+          sink.add(999);
+        },
+      );
+
+      stream.listen(events.add);
+      cancellable.cancel();
+
+      await Future.delayed(Duration.zero);
+      expect(events, [999]);
+    });
+
+    test('onCancel callback can add error to sink', () async {
+      final controller = StreamController<int>(sync: true);
+      final cancellable = Cancellable();
+      final errors = [];
+
+      final stream = controller.stream.bindCancellable(
+        cancellable,
+        onCancel: (exception, sink) {
+          sink.addError('on-cancel-error');
+        },
+      );
+
+      stream.listen((_) {}, onError: errors.add);
+      cancellable.cancel();
+
+      await Future.delayed(Duration.zero);
+      expect(errors, ['on-cancel-error']);
+    });
+
+    test('onCancel called when already cancelled before listen', () async {
+      final controller = StreamController<int>(sync: true);
+      final cancellable = Cancellable.cancelled('already');
+      bool onCancelCalled = false;
+
+      final stream = controller.stream.bindCancellable(
+        cancellable,
+        onCancel: (exception, sink) {
+          onCancelCalled = true;
+          expect(exception.reason, 'already');
+        },
+      );
+
+      stream.listen((_) {});
+
+      // 当已经取消时，onListen 会同步触发 onCancelCallback
+      expect(onCancelCalled, isTrue);
+    });
+
+    test('onCancel error should be caught and added to sink', () async {
+      final controller = StreamController<int>(sync: true);
+      final cancellable = Cancellable();
+      final errors = [];
+
+      final stream = controller.stream.bindCancellable(
+        cancellable,
+        onCancel: (exception, sink) {
+          throw 'callback-crash';
+        },
+      );
+
+      stream.listen((_) {}, onError: errors.add);
+      cancellable.cancel();
+
+      await Future.delayed(Duration.zero);
+      expect(errors, ['callback-crash']);
+    });
+
+    test('emitCancelledException priority over onCancel', () async {
+      final controller = StreamController<int>(sync: true);
+      final cancellable = Cancellable();
+      bool onCancelCalled = false;
+      final errors = [];
+
+      final stream = controller.stream.bindCancellable(
+        cancellable,
+        emitCancelledException: true,
+        onCancel: (exception, sink) {
+          onCancelCalled = true;
+        },
+      );
+
+      stream.listen((_) {}, onError: (e) => errors.add(e));
+      cancellable.cancel('priority-test');
+
+      await Future.delayed(Duration.zero);
+      expect(onCancelCalled, isFalse);
+      expect(errors.first, isA<CancelledException>().having((e) => e.reason, 'reason', 'priority-test'));
+    });
+  });
+
 }
