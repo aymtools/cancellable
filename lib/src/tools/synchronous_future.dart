@@ -68,3 +68,61 @@ class SynchronousFuture<T> implements Future<T> {
     }
   }
 }
+
+// class SynchronousErrorFuture<T> implements Future<T> {
+//   SynchronousErrorFuture(this._error, [this._stackTrace]);
+//
+//   final Object _error;
+//   final StackTrace? _stackTrace;
+//
+//   @override
+//   Stream<T> asStream() {
+//     final StreamController<T> controller = StreamController<T>();
+//     controller.addError(_error, _stackTrace);
+//     controller.close();
+//     return controller.stream;
+//   }
+//
+//   @override
+//   Future<T> catchError(Function onError, {bool Function(Object error)? test}) {
+//     if (onError is dynamic Function(Object, StackTrace)) {
+//       errResult = onError(error, stackTrace);
+//       hasValue = true;
+//     } else if (onError is dynamic Function(Object)) {
+//       errResult = onError(error);
+//       hasValue = true;
+//     }
+//   }
+//
+//   @override
+//   Future<R> then<R>(FutureOr<R> Function(T value) onValue,
+//       {Function? onError}) {
+//     if (onError == null) return SynchronousErrorFuture<R>(_error, _stackTrace);
+//     if (onError is dynamic Function(Object, StackTrace)) {
+//       errResult = onError(error, stackTrace);
+//     } else if (onError is dynamic Function(Object)) {
+//       errResult = onError(error);
+//     }
+//   }
+//
+//   @override
+//   Future<T> timeout(Duration timeLimit, {FutureOr<T> Function()? onTimeout}) {
+//     if (timeLimit <= Duration.zero) {
+//       return Future<T>.delayed(timeLimit, onTimeout);
+//     }
+//     return this;
+//   }
+//
+//   @override
+//   Future<T> whenComplete(FutureOr<dynamic> Function() action) {
+//     try {
+//       final FutureOr<dynamic> result = action();
+//       if (result is Future) {
+//         return result.then<T>((dynamic value) => _value);
+//       }
+//       return this;
+//     } catch (e, stack) {
+//       return SynchronousErrorFuture<T>(e, stack);
+//     }
+//   }
+// }

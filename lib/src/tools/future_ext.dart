@@ -52,17 +52,32 @@ extension CancellableFutureExt<T> on Future<T> {
       });
     }
 
-    then((value) {
-      if (cancellable.isAvailable && !completer.isCompleted) {
-        completer.complete(value);
-      }
-    }, onError: (err, st) {
-      if (cancellable.isAvailable && !completer.isCompleted) {
-        completer.completeError(err, st);
-      }
-      // return NeverExecFuture<T>();
-    });
+    // then((value) {
+    //   if (cancellable.isAvailable && !completer.isCompleted) {
+    //     completer.complete(value);
+    //   }
+    // }, onError: (err, st) {
+    //   if (cancellable.isAvailable && !completer.isCompleted) {
+    //     completer.completeError(err, st);
+    //   }
+    //   // return NeverExecFuture<T>();
+    // });
+    unawaited(_runFuture<T>(this, completer, cancellable));
 
     return completer.future;
+  }
+}
+
+Future<void> _runFuture<T>(
+    Future<T> future, Completer<T> completer, Cancellable cancellable) async {
+  try {
+    final result = await future;
+    if (cancellable.isAvailable && !completer.isCompleted) {
+      completer.complete(result);
+    }
+  } catch (error, stackTrace) {
+    if (cancellable.isAvailable && !completer.isCompleted) {
+      completer.completeError(error, stackTrace);
+    }
   }
 }
