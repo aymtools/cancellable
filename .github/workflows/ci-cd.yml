@@ -2,8 +2,10 @@ name: Dart Package CI/CD
 
 on:
   push:
-    branches: ["**"]
-    tags: ["v*"]
+    branches: ["**", "!main"] # 普通分支推送时触发，合并到 main 时不触发
+    tags: ["v*"]              # 推送版本标签时触发
+  pull_request:               # 代码合并到 main 之前的 PR 阶段执行校验
+    branches: ["main"]
 
 jobs:
   # 1. 守门员：分析通过后才执行后续
