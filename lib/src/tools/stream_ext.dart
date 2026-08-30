@@ -49,9 +49,9 @@ extension CancellableStream<T> on Stream<T> {
           }
           if (closeWhenCancel && !controller.isClosed) {
             // Future.microtask(() {
-              if (!controller.isClosed) {
-                controller.close();
-              }
+            if (!controller.isClosed) {
+              controller.close();
+            }
             // });
           }
         }
