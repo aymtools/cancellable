@@ -220,7 +220,7 @@ class _SynchronousErrorFuture<T> extends SynchronousFuture<T> {
   Stream<T> asStream() => Stream<T>.error(error, stackTrace);
 }
 
-/// 同步执行的Completer，优化了Completer<T>.sync()在complete后变成异步的问题
+/// 同步执行的Completer，优化了Completer&lt;T&gt;.sync()在complete后变成异步的问题
 class SynchronousCompleter<T> implements Completer<T> {
   // 状态机代理：一旦真正拿到结果，它就会替代原生的 Completer
   SynchronousFuture<T>? _syncFuture;
