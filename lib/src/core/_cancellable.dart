@@ -3,7 +3,7 @@ part of 'cancellable.dart';
 ///用于取消 不支持跨isolate使用
 @pragma('vm:isolate-unsendable')
 class _Cancellable implements Cancellable {
-  final Completer<CancelledException> _completer = Completer.sync();
+  final Completer<CancelledException> _completer = SynchronousCompleter();
   final Completer<CancelledException> _completerAsync = Completer();
 
   Set<Cancellable>? _caches;
@@ -12,12 +12,9 @@ class _Cancellable implements Cancellable {
 
   bool _isCancelled = false;
 
-  SynchronousFuture<CancelledException>? _synchronousFuture;
-
   ///当取消时的处理 同步处理
   @override
-  Future<CancelledException> get onCancel =>
-      _synchronousFuture ?? _completer.future;
+  Future<CancelledException> get onCancel => _completer.future;
 
   /// 当前是否是可用状态
   @override
@@ -47,7 +44,6 @@ class _Cancellable implements Cancellable {
     _reason = reason;
 
     _completer.complete(reasonAsException);
-    _synchronousFuture = SynchronousFuture(reasonAsException!);
     _completerAsync.complete(reasonAsException);
     _caches
         ?.where((element) => element.isAvailable)
