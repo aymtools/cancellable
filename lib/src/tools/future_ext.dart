@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cancellable/src/core/cancellable.dart';
 import 'package:cancellable/src/exception/cancelled_exception.dart';
 import 'package:cancellable/src/tools/never_exec_future.dart';
+import 'package:cancellable/src/tools/synchronous_future.dart';
 
 extension CancellableFutureExt<T> on Future<T> {
   /// 将future 关联到 Cancellable 当cancel后 不执行then 和 err
@@ -13,18 +14,19 @@ extension CancellableFutureExt<T> on Future<T> {
       FutureOr<T> Function(CancelledException exception)? onCancel}) {
     if (cancellable.isUnavailable) {
       if (throwWhenCancel) {
-        return Future<T>.error(
-            cancellable.reasonAsException!, StackTrace.empty);
+        return SynchronousFuture<T>.error(cancellable.reasonAsException!);
+        // return Future<T>.error(
+        //     cancellable.reasonAsException!, StackTrace.empty);
       } else if (onCancel != null) {
         try {
           dynamic result = onCancel(cancellable.reasonAsException!);
           if (result is Future<T>) {
             return result;
           } else {
-            return Future<T>.sync(() => result);
+            return SynchronousFuture<T>.value(result);
           }
         } catch (error, stackTrace) {
-          return Future<T>.error(error, stackTrace);
+          return SynchronousFuture<T>.error(error, stackTrace);
         }
       }
       return NeverExecFuture<T>();
@@ -52,32 +54,26 @@ extension CancellableFutureExt<T> on Future<T> {
       });
     }
 
-    // then((value) {
-    //   if (cancellable.isAvailable && !completer.isCompleted) {
-    //     completer.complete(value);
-    //   }
-    // }, onError: (err, st) {
-    //   if (cancellable.isAvailable && !completer.isCompleted) {
-    //     completer.completeError(err, st);
-    //   }
-    //   // return NeverExecFuture<T>();
-    // });
-    unawaited(_runFuture<T>(this, completer, cancellable));
+    _runFuture<T>(this, completer, cancellable);
 
     return completer.future;
   }
 }
 
-Future<void> _runFuture<T>(
-    Future<T> future, Completer<T> completer, Cancellable cancellable) async {
-  try {
-    final result = await future;
-    if (cancellable.isAvailable && !completer.isCompleted) {
-      completer.complete(result);
-    }
-  } catch (error, stackTrace) {
-    if (cancellable.isAvailable && !completer.isCompleted) {
-      completer.completeError(error, stackTrace);
-    }
-  }
+void _runFuture<T>(
+    Future<T> future, Completer<T> completer, Cancellable cancellable) {
+  unawaited(
+    future.then<void>(
+      (value) {
+        if (cancellable.isAvailable && !completer.isCompleted) {
+          completer.complete(value);
+        }
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        if (cancellable.isAvailable && !completer.isCompleted) {
+          completer.completeError(error, stackTrace);
+        }
+      },
+    ),
+  );
 }
