@@ -1,3 +1,8 @@
+## 2.8.0
+
+* Add `CancellableFuture` class to wrap normal `Future` into a cancellable `Future`.
+* Add `Future.asCancellableFuture` extension method to convert any `Future` into a `CancellableFuture`.
+
 ## 2.7.0
 
 * Add `onCancel` to `Stream/Future`'s bindCancellable to allow custom cancel handlers.
