@@ -1,7 +1,12 @@
+## 2.9.0
+
+* Optimize cache cleanup logic on cancellation.
+
 ## 2.8.0
 
 * Add `CancellableFuture` class to wrap normal `Future` into a cancellable `Future`.
-* Add `Future.asCancellableFuture` extension method to convert any `Future` into a `CancellableFuture`.
+* Add `Future.asCancellableFuture` extension method to convert any `Future` into a
+  `CancellableFuture`.
 
 ## 2.7.0
 

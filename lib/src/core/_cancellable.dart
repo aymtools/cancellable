@@ -58,7 +58,7 @@ class _Cancellable implements Cancellable {
     _cachesStrongRef = null;
   }
 
-  ///基于当前 生产一个新的
+  ///基于当前 生产一个新的  需要自行管理好双亲的引用，如果中间存在弱引用可能会导致取消的信号丢失
   ///[father] 同时接受两个上级取消的控制 有任意其他取消的时候新的也执行取消
   ///[infectious] 传染 当新的able执行取消的时候将生产者同时取消
   ///[weakRef] 新建的able 当前对其管理的方式是否为 弱引用
@@ -98,23 +98,20 @@ class _Cancellable implements Cancellable {
   }
 
   void _addToCache(_Cancellable cancellable, bool weakRef) {
+    late WeakReference<Set<Cancellable>> weakCache;
     if (weakRef) {
       _caches ??= WeakHashSet<Cancellable>();
       _caches?.add(cancellable);
-
-      WeakReference<Set<Cancellable>> weakCache = WeakReference(_caches!);
-      WeakReference<_Cancellable> weakChild = WeakReference(cancellable);
-      cancellable.whenCancel
-          .then((value) => weakCache.target?.remove(weakChild.target));
+      weakCache = WeakReference(_caches!);
     } else {
       _cachesStrongRef ??= HashSet<Cancellable>();
       _cachesStrongRef?.add(cancellable);
-      cancellable.whenCancel.then((value) {
-        if (isAvailable) {
-          _cachesStrongRef?.remove(cancellable);
-        }
-      });
+      weakCache = WeakReference(_cachesStrongRef!);
     }
+
+    WeakReference<_Cancellable> weakChild = WeakReference(cancellable);
+    cancellable.whenCancel
+        .then((value) => weakCache.target?.remove(weakChild.target));
   }
 
   void _bindParent(Cancellable? parent, bool weakRef) {
